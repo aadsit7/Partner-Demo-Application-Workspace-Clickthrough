@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Recast — Executive Click-Through (Branded)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://unpkg.com">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .focus-ring:focus-visible{outline:2px solid #facc15; outline-offset: 2px}
+    html,body{font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"}
+  </style>
+</head>
+<body class="min-h-screen bg-[#0a0f1f] text-slate-100 antialiased">
+  <div id="app" class="min-h-screen"></div>
+
+  <script>
+    const STATE = {
+      activeTab: 'problems',
+      impact: { minutes: 9, pkgHours: 191.2, riskHrs: 0 },
+      defaults: { impact: { minutes: 9, pkgHours: 191.2, riskHrs: 0 } },
+      ctx: { device: 'Windows', network: 'Corporate', compliant: true },
+      packHrs: 8,
+      configHrs: 2,
+      currentHrs: 24,
+      roiInputs: {
+        users: 5000,
+        ticketsPerUserPerMonth: 0.035,
+        avgHandleMins: 18,
+        loadedCostPerHour: 85,
+        recastAnnualCost: 120000
+      },
+      copied: false
+    };
+
+    const TABS = [
+      { id: 'problems', label: 'What it takes', icon: 'list-checks' },
+      { id: 'solution', label: 'What you get', icon: 'gift' },
+      { id: 'roi', label: 'Margins & ROI', icon: 'bar-chart-3' }
+    ];
+
+    function track(event, payload = {}) {
+      window.__recastAnalytics = window.__recastAnalytics || [];
+      window.__recastAnalytics.push({ ts: Date.now(), event, payload });
+      try { console.log('[analytics]', event, payload); } catch {}
+    }
+
+    function cx(...a){ return a.filter(Boolean).join(' '); }
+    function round(n){ return Math.round(n * 100) / 100; }
+    function num(n){ return new Intl.NumberFormat().format(Math.round(n)); }
+    function routeRecommendation(ctx){
+      if(!ctx.compliant) return 'Web';
+      if(ctx.device === 'Windows' && ctx.network !== 'Home') return 'Local';
+      return 'VDI';
+    }
+
+    function render() {
+      const root = document.getElementById('app');
+      root.innerHTML = `
+        <header class="relative overflow-hidden">
+          <div aria-hidden="true" class="pointer-events-none absolute inset-0">
+            <div class="absolute -top-40 -left-32 h-[420px] w-[420px] blur-[120px] rounded-full bg-gradient-to-br from-violet-600/25 via-fuchsia-500/20 to-cyan-500/25"></div>
+            <div class="absolute -top-20 right-0 h-[360px] w-[360px] blur-[120px] rounded-full bg-gradient-to-br from-cyan-400/20 via-sky-500/15 to-indigo-600/20"></div>
+          </div>
+          <div class="relative mx-auto max-w-7xl px-4 pt-12 pb-10">
+            <div class="opacity-0 translate-y-2 animate-[fadeInUp_.35s_ease_forwards]">
+              <p class="text-sm text-slate-300">We put <span class="font-semibold text-sky-300">partnership</span> at the center of how we go to market.</p>
+              <h1 class="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">
+                <span class="text-slate-100">Join </span>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-sky-400">Recast Partner Program</span>
+              </h1>
+
+              <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                ${tierCard('Registered','Access & referral economics', true)}
+                ${tierCard('Preferred','Pipeline tools, CRM access, joint motions', true, true)}
+                ${tierCard('Premier','Campaigns + priority support', true)}
+              </div>
+
+              <nav class="mt-6">
+                <div role="tablist" aria-label="Sections" class="flex w-full flex-wrap gap-2 rounded-full bg-[#0c142b] p-1 ring-1 ring-white/10">
+                  ${TABS.map(t => `
+                    <button
+                      type="button"
+                      class="${cx('group inline-flex items-center gap-2 rounded-full px-4 py-2 text-[15px] focus-ring transition', STATE.activeTab === t.id ? 'bg-[#101a36] text-white ring-2 ring-yellow-400' : 'text-slate-300 hover:bg-white/5')}"
+                      role="tab"
+                      id="tab-${t.id}"
+                      aria-selected="${STATE.activeTab === t.id}"
+                      aria-controls="panel-${t.id}"
+                      data-action="switch-tab"
+                      data-tab="${t.id}"
+                    >
+                      <i data-lucide="${t.icon}" class="w-4 h-4" aria-hidden="true"></i>
+                      <span>${t.label}</span>
+                    </button>
+                  `).join('')}
+                </div>
+              </nav>
+            </div>
+          </div>
+        </header>
+
+        <main class="mx-auto max-w-7xl px-4 pb-24">
+          <section class="mt-6">${renderActivePanel()}</section>
+        </main>
+      `;
+      if (window.lucide && window.lucide.createIcons) {
+        try { window.lucide.createIcons(); } catch {}
+      }
+      attachGlobalEvents();
+    }
+
+    function tierCard(title, sub, subtle=false, showDot=false){
+      return `
+        <div class="rounded-2xl border border-white/10 ${subtle ? 'bg-[#0c142b]' : 'bg-white/5'} p-5">
+          <div class="flex items-center gap-2">
+            <h3 class="text-xl font-semibold">${title}</h3>
+            ${showDot ? '<span class="inline-block h-2 w-2 rounded-full bg-sky-400" aria-hidden="true"></span>' : ''}
+          </div>
+          <p class="mt-1 text-sm text-slate-300">${sub}</p>
+        </div>
+      `;
+    }
+
+    function renderActivePanel(){
+      if (STATE.activeTab === 'problems') return renderProblems();
+      if (STATE.activeTab === 'solution') return renderSolution();
+      if (STATE.activeTab === 'roi') return renderROI();
+      return '';
+    }
+
+    function renderProblems(){
+      const items = [
+        { icon: 'layers', title: 'Fragmented delivery', sub: 'Windows / Mac / VDI / Web — users guess the right way.' },
+        { icon: 'boxes', title: 'Packaging backlog', sub: 'Rebuild per version; updates stall.' },
+        { icon: 'shield-alert', title: 'Zero-day exposure', sub: 'Patching takes days, not minutes.' },
+        { icon: 'building-2', title: 'Slow upgrades', sub: 'Stuck to old images; change is slow.' }
+      ];
+      return `
+        <section role="tabpanel" id="panel-problems" aria-labelledby="tab-problems">
+          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-5">
+            <h2 class="text-lg font-semibold">What it takes today</h2>
+            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              ${items.map(p => `
+                <article class="h-full rounded-xl border border-white/10 bg-[#0b1328] p-4">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="${p.icon}" class="w-5 h-5 text-sky-300" aria-hidden="true"></i>
+                    <h3 class="font-semibold">${p.title}</h3>
+                  </div>
+                  <p class="mt-1 text-sm text-slate-300">${p.sub}</p>
+                </article>
+              `).join('')}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderSolution(){
+      const saved = Math.max(0, Number(STATE.packHrs) - Number(STATE.configHrs));
+      const target = 1.5;
+      const reduced = Math.max(0, Number(STATE.currentHrs) - target);
+      const route = routeRecommendation(STATE.ctx);
+
+      return `
+        <section role="tabpanel" id="panel-solution" aria-labelledby="tab-solution" class="space-y-4">
+          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-5">
+            <h2 class="text-lg font-semibold">What you get</h2>
+            <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div class="flex h-full flex-col rounded-xl border border-white/10 bg-[#0b1328] p-5">
+                <div class="flex items-center gap-2">
+                  <span aria-hidden="true">🖥️</span>
+                  <h3 class="text-lg font-semibold">One Icon, Always the Right App</h3>
+                </div>
+                <p class="mt-1 text-sm text-slate-300">Users click once. Workspace chooses the right version (Windows, Mac, Web, VPN, VDI) automatically.</p>
+                <div class="mt-3 grid grid-cols-3 gap-2 text-sm">
+                  ${['Windows','Mac'].map(d=>pill(d, STATE.ctx.device===d, 'set-device', d)).join('')}
+                  ${['Corporate','VPN'].map(n=>pill(n, STATE.ctx.network===n, 'set-network', n)).join('')}
+                  ${pill(STATE.ctx.compliant?'Compliant':'Non-compliant', STATE.ctx.compliant, 'toggle-compliance', '')}
+                </div>
+                <div class="mt-3 text-sm text-slate-300">Recommended route:</div>
+                <div class="inline-flex w-fit items-center gap-2 rounded-full bg-yellow-400 px-3 py-1 text-slate-900">
+                  <i data-lucide="check-circle-2" class="w-4 h-4" aria-hidden="true"></i> ${route}
+                </div>
+                <div class="mt-auto pt-3">
+                  <button type="button" class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs hover:bg-white/20" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact</button>
+                </div>
+              </div>
+
+              <div class="flex h-full flex-col rounded-xl border border-white/10 bg-[#0b1328] p-5">
+                <div class="flex items-center gap-2">
+                  <span aria-hidden="true">⚙️</span>
+                  <h3 class="text-lg font-semibold">Update Once, Deploy Everywhere</h3>
+                </div>
+                <p class="mt-1 text-sm text-slate-300">Package an app one time and roll it out across all environments (cloud, on-prem, hybrid) with staged rollouts.</p>
+                <div class="mt-3 rounded-xl border border-white/10 bg-[#0a1124] p-4 text-sm">
+                  <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-2" class="w-4 h-4" aria-hidden="true"></i> Roll out critical app updates</div>
+                  <label class="mt-2 flex flex-col gap-1">
+                    <span class="text-xs text-slate-400">Hours per package → configure</span>
+                    <div class="flex items-center gap-2">
+                      <input aria-label="Hours per package" class="w-20 rounded bg-slate-950 px-2 py-1" inputmode="decimal" value="${STATE.packHrs}" data-action="set-pack-hrs">
+                      <span>→</span>
+                      <input aria-label="Hours to configure" class="w-20 rounded bg-slate-950 px-2 py-1" inputmode="decimal" value="${STATE.configHrs}" data-action="set-config-hrs">
+                    </div>
+                  </label>
+                  <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span>${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong>${saved} hrs saved</strong></div>
+                  <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-300">
+                    <span class="rounded-full bg-black/30 px-2 py-1" aria-hidden="true">☁️ Cloud</span>
+                    <span class="rounded-full bg-black/30 px-2 py-1" aria-hidden="true">🖥️ On-Prem</span>
+                    <span class="rounded-full bg-black/30 px-2 py-1" aria-hidden="true">🔀 Hybrid</span>
+                  </div>
+                  <div class="mt-1 text-xs text-slate-400">One console → multiple tenants (A, B, C) with staged rollouts.</div>
+                  <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
+                </div>
+              </div>
+
+              <div class="flex h-full flex-col rounded-xl border border-white/10 bg-[#0b1328] p-5">
+                <div class="flex items-center gap-2">
+                  <span aria-hidden="true">🛡️</span>
+                  <h3 class="text-lg font-semibold">Zero-Day Patches in Hours</h3>
+                </div>
+                <p class="mt-1 text-sm text-slate-300">Security fixes roll out in 1–2 hours instead of a full day, cutting exposure windows by 90%.</p>
+                <div class="mt-3 rounded-xl border border-white/10 bg-[#0a1124] p-4 text-sm">
+                  <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4" aria-hidden="true"></i> Zero-day rollout</div>
+                  <label class="mt-2 flex flex-col gap-1">
+                    <span class="text-xs text-slate-400">Current time-to-deploy (hrs)</span>
+                    <input class="rounded bg-slate-950 px-2 py-1" aria-label="Current time to deploy (hours)" inputmode="decimal" value="${STATE.currentHrs}" data-action="set-current-hrs">
+                  </label>
+                  <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span>${STATE.currentHrs} → 1.5 hrs</span><strong>${round(reduced)} hrs reduced</strong></div>
+                  <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div class="text-sm">Manage once. Deploy anywhere — every step here drives measurable ROI.</div>
+            <button type="button" data-action="advance" data-next="roi" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-5 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:brightness-95 focus-ring">
+              See Margins & ROI
+            </button>
+          </div>
+        </section>
+      `;
+    }
+
+    function pill(label, active, action, value){
+      return `
+        <button type="button" class="${cx('rounded-full px-3 py-1 border text-sm transition', active ? 'bg-yellow-400 text-slate-900 border-transparent' : 'bg-[#0a1124] text-slate-200 hover:bg-white/10 border-white/10')}" data-action="${action}" data-value="${String(value)}">${label}</button>
+      `;
+    }
+
+    function kpi(icon,label,value,hint){
+      return `
+        <div class="rounded-2xl border border-white/10 bg-[#0b1328] p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-xs text-slate-300">${label}</div>
+              <div class="text-xl font-semibold">${value}</div>
+            </div>
+            <i data-lucide="${icon}" class="w-5 h-5 text-sky-300" aria-hidden="true"></i>
+          </div>
+          ${hint ? `<div class="mt-1 text-xs text-slate-400">${hint}</div>` : ''}
+        </div>
+      `;
+    }
+
+    function numInput(label, key, value){
+      return `
+        <label class="flex flex-col gap-1">
+          <span class="text-xs text-slate-300">${label}</span>
+          <input class="rounded-xl border border-white/10 bg-[#0b1328] px-3 py-2 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}">
+        </label>
+      `;
+    }
+
+    function kv(label, value){
+      return `
+        <div class="flex items-center justify-between rounded-lg bg-black/20 px-3 py-2">
+          <span class="text-slate-300">${label}</span>
+          <span class="font-semibold">${value}</span>
+        </div>
+      `;
+    }
+
+    function renderROI(){
+      const i = STATE.roiInputs;
+      const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
+      const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
+      const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours;
+      const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
+      const dollarSavedYear = dollarSavedMonth * 12;
+      const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
+      const roiPct = i.recastAnnualCost ? (netBenefitYear / i.recastAnnualCost) * 100 : 0;
+      const fteHoursYear = 2080;
+      const fteEquivalent = (totalHoursSavedMonth * 12) / fteHoursYear;
+
+      return `
+        <section role="tabpanel" id="panel-roi" aria-labelledby="tab-roi" class="space-y-6">
+          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
+            <div class="text-sm font-medium">Application Workspace pays for itself in weeks, not years.</div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            ${kpi('timer','Hours saved / mo', round(totalHoursSavedMonth), 'Per-user minutes × users + packaging')}
+            ${kpi('line-chart','$ saved / yr', `$${num(dollarSavedYear)}`, 'Illustrative only')}
+            ${kpi('percent','ROI', `${round(roiPct)}%`, 'Net of subscription')}
+            ${kpi('rocket','Tickets / mo', num(ticketsMonth), 'Scale context')}
+          </div>
+
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-5 lg:col-span-2">
+              <h3 class="text-lg font-semibold">Assumptions (edit)</h3>
+              <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                ${numInput('# users','users', i.users)}
+                ${numInput('Tickets per user / mo','ticketsPerUserPerMonth', i.ticketsPerUserPerMonth)}
+                ${numInput('Avg handle (mins)','avgHandleMins', i.avgHandleMins)}
+                ${numInput('Loaded cost ($/hr)','loadedCostPerHour', i.loadedCostPerHour)}
+                ${numInput('Recast annual cost ($)','recastAnnualCost', i.recastAnnualCost)}
+              </div>
+              <div class="mt-4 text-xs text-slate-400">All values are examples. Replace with your data for accurate estimates.</div>
+            </div>
+
+            <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-5">
+              <h3 class="text-lg font-semibold">Results</h3>
+              <div class="mt-3 space-y-2 text-sm">
+                ${kv('Hours saved / month', round(totalHoursSavedMonth))}
+                ${kv('$ saved / month', `$${num(dollarSavedMonth)}`)}
+                ${kv('$ saved / year', `$${num(dollarSavedYear)}`)}
+                ${kv('Net benefit / year', `$${num(netBenefitYear)}`)}
+                ${kv('ROI', `${round(roiPct)}%`)}
+                ${kv('Equivalent IT FTEs freed', round(fteEquivalent))}
+              </div>
+              <div class="mt-2 text-xs text-slate-400 italic">Add a short customer proof-point here for credibility (e.g., “Cut packaging time by 80% in first 30 days”).</div>
+              <div class="mt-4 flex flex-wrap gap-2">
+                <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-white/20 focus-ring">Reset</button>
+                <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:brightness-95 focus-ring">
+                  <i data-lucide="clipboard" class="w-4 h-4" aria-hidden="true"></i> ${STATE.copied ? 'Copied!' : 'Copy executive one-pager'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-400">Transparency: Recast AW complements device management (e.g., Intune). Windows/macOS focus. Metrics are illustrative; actuals vary.</p>
+        </section>
+      `;
+    }
+
+    function attachGlobalEvents(){
+      const root = document.getElementById('app');
+
+      root.querySelectorAll('[data-action="switch-tab"]').forEach(btn=>{
+        btn.addEventListener('click', (e)=>{
+          const next = e.currentTarget.getAttribute('data-tab');
+          STATE.activeTab = next;
+          track('scene_viewed', { scene: next });
+          render();
+        });
+      });
+
+      root.querySelectorAll('[data-action="advance"]').forEach(btn=>{
+        btn.addEventListener('click', (e)=>{
+          const next = e.currentTarget.getAttribute('data-next');
+          STATE.activeTab = next;
+          track('toggle_changed', { control: 'tab', value: next });
+          track('scene_viewed', { scene: next });
+          render();
+        });
+      });
+
+      root.querySelectorAll('[data-action="set-device"]').forEach(btn=>{
+        btn.addEventListener('click', e=>{
+          STATE.ctx.device = e.currentTarget.getAttribute('data-value');
+          track('toggle_changed', { control: 'device', value: STATE.ctx.device });
+          render();
+        });
+      });
+
+      root.querySelectorAll('[data-action="set-network"]').forEach(btn=>{
+        btn.addEventListener('click', e=>{
+          STATE.ctx.network = e.currentTarget.getAttribute('data-value');
+          track('toggle_changed', { control: 'network', value: STATE.ctx.network });
+          render();
+        });
+      });
+
+      root.querySelectorAll('[data-action="toggle-compliance"]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          STATE.ctx.compliant = !STATE.ctx.compliant;
+          track('toggle_changed', { control: 'compliant', value: STATE.ctx.compliant });
+          render();
+        });
+      });
+
+      const pack = root.querySelector('[data-action="set-pack-hrs"]');
+      if (pack) pack.addEventListener('input', (e)=>{
+        const v = Number(String(e.target.value).replace(/[^0-9.\-]/g,''));
+        STATE.packHrs = isFinite(v) ? v : 0;
+      });
+
+      const cfg = root.querySelector('[data-action="set-config-hrs"]');
+      if (cfg) cfg.addEventListener('input', (e)=>{
+        const v = Number(String(e.target.value).replace(/[^0-9.\-]/g,''));
+        STATE.configHrs = isFinite(v) ? v : 0;
+      });
+
+      const cur = root.querySelector('[data-action="set-current-hrs"]');
+      if (cur) cur.addEventListener('input', (e)=>{
+        const v = Number(String(e.target.value).replace(/[^0-9.\-]/g,''));
+        STATE.currentHrs = isFinite(v) ? v : 0;
+      });
+
+      root.querySelectorAll('[data-action="add-impact"]').forEach(btn=>{
+        btn.addEventListener('click', (e)=>{
+          const kind = e.currentTarget.getAttribute('data-kind');
+          const val = Number(e.currentTarget.getAttribute('data-value')) || 0;
+          if (kind === 'minutes') STATE.impact.minutes = Number(STATE.impact.minutes) + val;
+          if (kind === 'pkgHours') STATE.impact.pkgHours = Number(STATE.impact.pkgHours) + val;
+          if (kind === 'riskHrs') STATE.impact.riskHrs = Number(STATE.impact.riskHrs) + val;
+          track('toggle_changed', { control: `impact_${kind}`, value: val });
+          render();
+        });
+      });
+
+      root.querySelectorAll('[data-action="set-roi"]').forEach(inp=>{
+        inp.addEventListener('input', (e)=>{
+          const key = e.currentTarget.getAttribute('data-key');
+          const v = Number(String(e.target.value).replace(/[^0-9.\-]/g,''));
+          STATE.roiInputs[key] = isFinite(v) ? v : 0;
+        });
+      });
+
+      const resetBtn = root.querySelector('[data-action="reset-calculator"]');
+      if (resetBtn) resetBtn.addEventListener('click', ()=>{
+        STATE.roiInputs = {
+          users: 5000,
+          ticketsPerUserPerMonth: 0.035,
+          avgHandleMins: 18,
+          loadedCostPerHour: 85,
+          recastAnnualCost: 120000
+        };
+        STATE.impact = { ...STATE.defaults.impact };
+        track('cta_clicked', { cta: 'reset_calculator' });
+        render();
+      });
+
+      const copyBtn = root.querySelector('[data-action="copy-onepager"]');
+      if (copyBtn) copyBtn.addEventListener('click', async ()=>{
+        const i = STATE.roiInputs;
+        const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
+        const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
+        const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours;
+        const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
+        const dollarSavedYear = dollarSavedMonth * 12;
+        const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
+        const roiPct = i.recastAnnualCost ? (netBenefitYear / i.recastAnnualCost) * 100 : 0;
+        const fteHoursYear = 2080;
+        const fteEquivalent = (totalHoursSavedMonth * 12) / fteHoursYear;
+
+        const body =
+`Recast Application Workspace — Executive One-Pager (Per-User Model)
+
+Assumptions
+ - Users: ${i.users}
+ - Tickets per user / month: ${i.ticketsPerUserPerMonth}
+ - Avg handle: ${i.avgHandleMins} mins
+ - Loaded cost: $${i.loadedCostPerHour}/hr
+ - Subscription (annual): $${i.recastAnnualCost}
+
+Observed demo impact (illustrative)
+ - Minutes saved per user (monthly): ${STATE.impact.minutes}
+ - Packaging hours avoided (org): ${STATE.impact.pkgHours}
+ - Zero-day window reduced (hrs): ${STATE.impact.riskHrs}
+
+Calculated outcomes
+ - Tickets / month: ${num(ticketsMonth)}
+ - Hours saved / month: ${round(totalHoursSavedMonth)}
+ - $ saved / month: $${num(dollarSavedMonth)}
+ - $ saved / year: $${num(dollarSavedYear)}
+ - Net benefit / year: $${num(netBenefitYear)}
+ - ROI: ${round(roiPct)}%
+ - Equivalent IT FTEs freed: ${round(fteEquivalent)}
+
+Notes: All values are examples; replace with your data for accurate estimates.`;
+        try {
+          await navigator.clipboard.writeText(body);
+        } catch {
+          const ta = document.createElement('textarea');
+          ta.value = body;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        STATE.copied = true;
+        track('cta_clicked', { cta: 'copy_onepager' });
+        render();
+        setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
+      });
+    }
+
+    (function injectAnimations(){
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes fadeInUp { from { opacity:.0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+      `;
+      document.head.appendChild(style);
+    })();
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      track('scene_viewed', { scene: STATE.activeTab });
+      render();
+    });
+  </script>
+</body>
+</html>
