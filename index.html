@@ -15,7 +15,7 @@
     html,body{font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"}
   </style>
 </head>
-<body class="min-h-screen bg-[#0a0f1f] text-slate-100 antialiased">
+<body class="min-h-screen bg-[#0b1020] text-slate-100 antialiased">
   <div id="app" class="min-h-screen"></div>
 
   <script>
@@ -38,9 +38,9 @@
     };
 
     const TABS = [
-      { id: 'problems', label: 'What it takes', icon: 'list-checks' },
-      { id: 'solution', label: 'What you get', icon: 'gift' },
-      { id: 'roi', label: 'Margins & ROI', icon: 'bar-chart-3' }
+      { id: 'problems', label: 'Current Problems', icon: 'alert-triangle' },
+      { id: 'solution', label: 'How We Solve It', icon: 'workflow' },
+      { id: 'roi', label: 'Impact & ROI', icon: 'bar-chart-3' }
     ];
 
     function track(event, payload = {}) {
@@ -62,48 +62,43 @@
       const root = document.getElementById('app');
       root.innerHTML = `
         <header class="relative overflow-hidden">
-          <div aria-hidden="true" class="pointer-events-none absolute inset-0">
-            <div class="absolute -top-40 -left-32 h-[420px] w-[420px] blur-[120px] rounded-full bg-gradient-to-br from-violet-600/25 via-fuchsia-500/20 to-cyan-500/25"></div>
-            <div class="absolute -top-20 right-0 h-[360px] w-[360px] blur-[120px] rounded-full bg-gradient-to-br from-cyan-400/20 via-sky-500/15 to-indigo-600/20"></div>
+          <div aria-hidden="true" class="absolute inset-0">
+            <div class="absolute -top-48 -left-20 h-[520px] w-[520px] blur-[120px] rounded-full bg-gradient-to-br from-sky-500/25 via-indigo-500/20 to-fuchsia-500/30"></div>
+            <div class="absolute -top-24 right-0 h-[360px] w-[360px] blur-[120px] rounded-full bg-gradient-to-br from-fuchsia-400/25 via-purple-500/20 to-sky-500/25"></div>
           </div>
-          <div class="relative mx-auto max-w-7xl px-4 pt-12 pb-10">
-            <div class="opacity-0 translate-y-2 animate-[fadeInUp_.35s_ease_forwards]">
-              <p class="text-sm text-slate-300">We put <span class="font-semibold text-sky-300">partnership</span> at the center of how we go to market.</p>
-              <h1 class="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">
-                <span class="text-slate-100">Join </span>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-sky-400">Recast Partner Program</span>
-              </h1>
-
-              <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                ${tierCard('Registered','Access & referral economics', true)}
-                ${tierCard('Preferred','Pipeline tools, CRM access, joint motions', true, true)}
-                ${tierCard('Premier','Campaigns + priority support', true)}
-              </div>
-
-              <nav class="mt-6">
-                <div role="tablist" aria-label="Sections" class="flex w-full flex-wrap gap-2 rounded-full bg-[#0c142b] p-1 ring-1 ring-white/10">
-                  ${TABS.map(t => `
-                    <button
-                      type="button"
-                      class="${cx('group inline-flex items-center gap-2 rounded-full px-4 py-2 text-[15px] focus-ring transition', STATE.activeTab === t.id ? 'bg-[#101a36] text-white ring-2 ring-yellow-400' : 'text-slate-300 hover:bg-white/5')}"
-                      role="tab"
-                      id="tab-${t.id}"
-                      aria-selected="${STATE.activeTab === t.id}"
-                      aria-controls="panel-${t.id}"
-                      data-action="switch-tab"
-                      data-tab="${t.id}"
-                    >
-                      <i data-lucide="${t.icon}" class="w-4 h-4" aria-hidden="true"></i>
-                      <span>${t.label}</span>
-                    </button>
-                  `).join('')}
-                </div>
-              </nav>
+          <div class="relative mx-auto max-w-7xl px-4 pt-10 pb-8">
+            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400">All Your Applications. One Workspace. Always Secure and Up to Date.</span>
+            </h1>
+            <p class="mt-3 max-w-3xl text-slate-300">From challenges to results: how Application Workspace reduces risk, saves time, and proves ROI.</p>
+          </div>
+          <div class="relative mx-auto max-w-7xl px-4">
+            <div role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded-full bg-[#0b152f] p-1 ring-1 ring-white/10">
+              ${TABS.map(t => `
+                <button
+                  type="button"
+                  class="${cx('group inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm sm:text-base focus-ring transition', STATE.activeTab === t.id ? 'bg-yellow-400 text-slate-900' : 'text-slate-200 hover:bg-white/5')}"
+                  role="tab"
+                  id="tab-${t.id}"
+                  aria-selected="${STATE.activeTab === t.id}"
+                  aria-controls="panel-${t.id}"
+                  data-action="switch-tab"
+                  data-tab="${t.id}"
+                >
+                  <i data-lucide="${t.icon}" class="w-4 h-4" aria-hidden="true"></i>
+                  <span>${t.label}</span>
+                </button>
+              `).join('')}
             </div>
           </div>
         </header>
 
         <main class="mx-auto max-w-7xl px-4 pb-24">
+          <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            ${renderMetricChip('Minutes saved (per user)', String(STATE.impact.minutes), 'emerald')}
+            ${renderMetricChip('Packaging hours avoided', String(STATE.impact.pkgHours), 'sky')}
+            ${renderMetricChip('Zero-day window reduced (hrs)', String(round(STATE.impact.riskHrs)), 'yellow')}
+          </div>
           <section class="mt-6">${renderActivePanel()}</section>
         </main>
       `;
@@ -113,14 +108,19 @@
       attachGlobalEvents();
     }
 
-    function tierCard(title, sub, subtle=false, showDot=false){
+    function renderMetricChip(label, value, tone){
+      const tones = {
+        emerald: 'from-emerald-400/80 to-teal-400/80',
+        sky: 'from-sky-400/80 to-indigo-400/80',
+        yellow: 'from-yellow-300/90 to-amber-400/90'
+      };
       return `
-        <div class="rounded-2xl border border-white/10 ${subtle ? 'bg-[#0c142b]' : 'bg-white/5'} p-5">
-          <div class="flex items-center gap-2">
-            <h3 class="text-xl font-semibold">${title}</h3>
-            ${showDot ? '<span class="inline-block h-2 w-2 rounded-full bg-sky-400" aria-hidden="true"></span>' : ''}
+        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
+          <div class="text-xs text-slate-300">${label}</div>
+          <div class="mt-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-r px-2.5 py-0.5 text-slate-900 ${tones[tone]}">
+            <i data-lucide="badge-check" class="w-4 h-4" aria-hidden="true"></i>
+            <span class="text-sm font-semibold">${value}</span>
           </div>
-          <p class="mt-1 text-sm text-slate-300">${sub}</p>
         </div>
       `;
     }
@@ -133,29 +133,68 @@
     }
 
     function renderProblems(){
-      const items = [
-        { icon: 'layers', title: 'Fragmented delivery', sub: 'Windows / Mac / VDI / Web — users guess the right way.' },
-        { icon: 'boxes', title: 'Packaging backlog', sub: 'Rebuild per version; updates stall.' },
-        { icon: 'shield-alert', title: 'Zero-day exposure', sub: 'Patching takes days, not minutes.' },
-        { icon: 'building-2', title: 'Slow upgrades', sub: 'Stuck to old images; change is slow.' }
+      const problems = [
+        { key: 'frag', title: 'Fragmented delivery', sub: 'Windows / Mac / VDI / Web — users guess the right way.', icon: 'layers' },
+        { key: 'package', title: 'Packaging backlog', sub: 'Rebuild per version; updates stall.', icon: 'boxes' },
+        { key: 'zeroday', title: 'Zero-day exposure', sub: 'Patching takes days, not minutes.', icon: 'shield' },
+        { key: 'migration', title: 'Slow upgrades', sub: 'Stuck to old images; change is slow.', icon: 'layout-grid' }
       ];
       return `
         <section role="tabpanel" id="panel-problems" aria-labelledby="tab-problems">
-          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-5">
-            <h2 class="text-lg font-semibold">What it takes today</h2>
-            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              ${items.map(p => `
-                <article class="h-full rounded-xl border border-white/10 bg-[#0b1328] p-4">
-                  <div class="flex items-center gap-2">
-                    <i data-lucide="${p.icon}" class="w-5 h-5 text-sky-300" aria-hidden="true"></i>
-                    <h3 class="font-semibold">${p.title}</h3>
-                  </div>
-                  <p class="mt-1 text-sm text-slate-300">${p.sub}</p>
-                </article>
-              `).join('')}
-            </div>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            ${problems.map(p => `
+              <article class="group flex h-full flex-col gap-2 rounded-2xl border border-white/10 bg-[#0c142b] p-5">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="${p.icon}" class="w-5 h-5 text-sky-300" aria-hidden="true"></i>
+                  <h3 class="text-lg font-semibold">${p.title}</h3>
+                </div>
+                <p class="text-sm text-slate-300">${p.sub}</p>
+              </article>
+            `).join('')}
+          </div>
+
+          <p class="mt-6 text-sm text-slate-300">Outcome first: apps that just work — always current and secure — without constant IT firefighting.</p>
+
+          <div class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-3">
+            ${brandCallout('alert-triangle','Why change',[
+              'App delivery is siloed and slow.',
+              'Packaging absorbs scarce time.',
+              'Patching lags widen risk windows.'
+            ])}
+            ${brandCallout('clock-4','Why now',[
+              'Migration deadlines & renewals are fixed.',
+              'Threats move faster than old processes.',
+              'Delays carry hard $ & risk costs.'
+            ])}
+            ${brandCallout('sparkles','What good looks like with Application Workspace',[
+              'Unified app access: one workspace, any device.',
+              'Configure once, deploy anywhere, patch automatically.',
+              'Zero-day closed in hours, not days.'
+            ], true)}
           </div>
         </section>
+      `;
+    }
+
+    function brandCallout(icon,label,bullets,showCTA=false){
+      return `
+        <div class="relative rounded-2xl border border-white/10 bg-[#0c142b] p-4">
+          <div class="flex items-center gap-2 text-sm font-semibold">
+            <i data-lucide="${icon}" class="w-4 h-4 text-amber-400" aria-hidden="true"></i>
+            <span>${label}</span>
+          </div>
+          <ul class="mt-2 list-disc pl-5 text-sm text-slate-300">
+            ${bullets.map(b=>`<li>${b}</li>`).join('')}
+          </ul>
+          ${showCTA ? `
+            <div class="mt-4 flex justify-end">
+              <button type="button" data-action="advance" data-next="solution" class="inline-flex items-center gap-2 rounded-full bg-[#e76a1f] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 focus-ring">
+                <i data-lucide="arrow-right" class="w-4 h-4" aria-hidden="true"></i>
+                How Recast solves it
+              </button>
+            </div>
+          ` : ''}
+        </div>
       `;
     }
 
@@ -164,83 +203,72 @@
       const target = 1.5;
       const reduced = Math.max(0, Number(STATE.currentHrs) - target);
       const route = routeRecommendation(STATE.ctx);
-
       return `
         <section role="tabpanel" id="panel-solution" aria-labelledby="tab-solution" class="space-y-4">
-          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-5">
-            <h2 class="text-lg font-semibold">What you get</h2>
-            <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div class="flex h-full flex-col rounded-xl border border-white/10 bg-[#0b1328] p-5">
-                <div class="flex items-center gap-2">
-                  <span aria-hidden="true">🖥️</span>
-                  <h3 class="text-lg font-semibold">One Icon, Always the Right App</h3>
-                </div>
-                <p class="mt-1 text-sm text-slate-300">Users click once. Workspace chooses the right version (Windows, Mac, Web, VPN, VDI) automatically.</p>
-                <div class="mt-3 grid grid-cols-3 gap-2 text-sm">
-                  ${['Windows','Mac'].map(d=>pill(d, STATE.ctx.device===d, 'set-device', d)).join('')}
-                  ${['Corporate','VPN'].map(n=>pill(n, STATE.ctx.network===n, 'set-network', n)).join('')}
-                  ${pill(STATE.ctx.compliant?'Compliant':'Non-compliant', STATE.ctx.compliant, 'toggle-compliance', '')}
-                </div>
-                <div class="mt-3 text-sm text-slate-300">Recommended route:</div>
-                <div class="inline-flex w-fit items-center gap-2 rounded-full bg-yellow-400 px-3 py-1 text-slate-900">
-                  <i data-lucide="check-circle-2" class="w-4 h-4" aria-hidden="true"></i> ${route}
-                </div>
-                <div class="mt-auto pt-3">
-                  <button type="button" class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs hover:bg-white/20" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact</button>
-                </div>
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div class="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-[#0c142b] p-5">
+              <div class="flex items-center gap-2">
+                <span aria-hidden="true">🖥️</span>
+                <h3 class="text-lg font-semibold">One Icon, Always the Right App</h3>
               </div>
-
-              <div class="flex h-full flex-col rounded-xl border border-white/10 bg-[#0b1328] p-5">
-                <div class="flex items-center gap-2">
-                  <span aria-hidden="true">⚙️</span>
-                  <h3 class="text-lg font-semibold">Update Once, Deploy Everywhere</h3>
-                </div>
-                <p class="mt-1 text-sm text-slate-300">Package an app one time and roll it out across all environments (cloud, on-prem, hybrid) with staged rollouts.</p>
-                <div class="mt-3 rounded-xl border border-white/10 bg-[#0a1124] p-4 text-sm">
-                  <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-2" class="w-4 h-4" aria-hidden="true"></i> Roll out critical app updates</div>
-                  <label class="mt-2 flex flex-col gap-1">
-                    <span class="text-xs text-slate-400">Hours per package → configure</span>
-                    <div class="flex items-center gap-2">
-                      <input aria-label="Hours per package" class="w-20 rounded bg-slate-950 px-2 py-1" inputmode="decimal" value="${STATE.packHrs}" data-action="set-pack-hrs">
-                      <span>→</span>
-                      <input aria-label="Hours to configure" class="w-20 rounded bg-slate-950 px-2 py-1" inputmode="decimal" value="${STATE.configHrs}" data-action="set-config-hrs">
-                    </div>
-                  </label>
-                  <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span>${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong>${saved} hrs saved</strong></div>
-                  <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-300">
-                    <span class="rounded-full bg-black/30 px-2 py-1" aria-hidden="true">☁️ Cloud</span>
-                    <span class="rounded-full bg-black/30 px-2 py-1" aria-hidden="true">🖥️ On-Prem</span>
-                    <span class="rounded-full bg-black/30 px-2 py-1" aria-hidden="true">🔀 Hybrid</span>
-                  </div>
-                  <div class="mt-1 text-xs text-slate-400">One console → multiple tenants (A, B, C) with staged rollouts.</div>
-                  <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
-                </div>
+              <p class="text-sm text-slate-300">Users click once. Workspace chooses the right version (Windows, Mac, Web, VPN, VDI) automatically.</p>
+              <div class="mt-2 grid grid-cols-3 gap-2 text-sm">
+                ${['Windows','Mac'].map(d=>pill(d, STATE.ctx.device===d, 'set-device', d)).join('')}
+                ${['Corporate','VPN'].map(n=>pill(n, STATE.ctx.network===n, 'set-network', n)).join('')}
+                ${pill(STATE.ctx.compliant?'Compliant':'Non-compliant', STATE.ctx.compliant, 'toggle-compliance', '')}
               </div>
-
-              <div class="flex h-full flex-col rounded-xl border border-white/10 bg-[#0b1328] p-5">
-                <div class="flex items-center gap-2">
-                  <span aria-hidden="true">🛡️</span>
-                  <h3 class="text-lg font-semibold">Zero-Day Patches in Hours</h3>
-                </div>
-                <p class="mt-1 text-sm text-slate-300">Security fixes roll out in 1–2 hours instead of a full day, cutting exposure windows by 90%.</p>
-                <div class="mt-3 rounded-xl border border-white/10 bg-[#0a1124] p-4 text-sm">
-                  <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4" aria-hidden="true"></i> Zero-day rollout</div>
-                  <label class="mt-2 flex flex-col gap-1">
-                    <span class="text-xs text-slate-400">Current time-to-deploy (hrs)</span>
-                    <input class="rounded bg-slate-950 px-2 py-1" aria-label="Current time to deploy (hours)" inputmode="decimal" value="${STATE.currentHrs}" data-action="set-current-hrs">
-                  </label>
-                  <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span>${STATE.currentHrs} → 1.5 hrs</span><strong>${round(reduced)} hrs reduced</strong></div>
-                  <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
-                </div>
+              <div class="text-sm text-slate-300">Recommended route:</div>
+              <div class="inline-flex w-fit items-center gap-2 rounded-full bg-yellow-400 px-3 py-1 text-slate-900">
+                <i data-lucide="check-circle-2" class="w-4 h-4" aria-hidden="true"></i> ${route}
+              </div>
+              <div class="mt-auto">
+                <button type="button" class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs hover:bg-white/20" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact</button>
               </div>
             </div>
-          </div>
 
-          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div class="text-sm">Manage once. Deploy anywhere — every step here drives measurable ROI.</div>
-            <button type="button" data-action="advance" data-next="roi" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-5 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:brightness-95 focus-ring">
-              See Margins & ROI
-            </button>
+            <div class="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-[#0c142b] p-5">
+              <div class="flex items-center gap-2">
+                <span aria-hidden="true">⚙️</span>
+                <h3 class="text-lg font-semibold">Update Once, Deploy Everywhere</h3>
+              </div>
+              <p class="text-sm text-slate-300">Package an app one time and roll it out across all environments (cloud, on-prem, hybrid) with staged rollouts.</p>
+              <div class="rounded-xl border border-white/10 bg-[#0a1124] p-4 text-sm">
+                <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-2" class="w-4 h-4" aria-hidden="true"></i> Roll out critical app updates</div>
+                <label class="mt-2 flex flex-col gap-1">
+                  <span class="text-xs text-slate-400">Hours per package → configure</span>
+                  <div class="flex items-center gap-2">
+                    <input aria-label="Hours per package" class="w-20 rounded bg-slate-950 px-2 py-1" inputmode="decimal" value="${STATE.packHrs}" data-action="set-pack-hrs">
+                    <span>→</span>
+                    <input aria-label="Hours to configure" class="w-20 rounded bg-slate-950 px-2 py-1" inputmode="decimal" value="${STATE.configHrs}" data-action="set-config-hrs">
+                  </div>
+                </label>
+                <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span>${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong>${saved} hrs saved</strong></div>
+                <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-300">
+                  <span class="rounded-full bg-black/30 px-2 py-1" aria-hidden="true">☁️ Cloud</span>
+                  <span class="rounded-full bg-black/30 px-2 py-1" aria-hidden="true">🖥️ On-Prem</span>
+                  <span class="rounded-full bg-black/30 px-2 py-1" aria-hidden="true">🔀 Hybrid</span>
+                </div>
+                <div class="mt-1 text-xs text-slate-400">One console → multiple tenants (A, B, C) with staged rollouts.</div>
+                <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
+              </div>
+            </div>
+
+            <div class="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-[#0c142b] p-5">
+              <div class="flex items-center gap-2">
+                <span aria-hidden="true">🛡️</span>
+                <h3 class="text-lg font-semibold">Zero-Day Patches in Hours</h3>
+              </div>
+              <p class="text-sm text-slate-300">Security fixes roll out in 1–2 hours instead of a full day, cutting exposure windows by 90%.</p>
+              <div class="rounded-xl border border-white/10 bg-[#0a1124] p-4 text-sm">
+                <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4" aria-hidden="true"></i> Zero-day rollout</div>
+                <label class="mt-2 flex flex-col gap-1">
+                  <span class="text-xs text-slate-400">Current time-to-deploy (hrs)</span>
+                  <input class="rounded bg-slate-950 px-2 py-1" aria-label="Current time to deploy (hours)" inputmode="decimal" value="${STATE.currentHrs}" data-action="set-current-hrs">
+                </label>
+                <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span>${STATE.currentHrs} → 1.5 hrs</span><strong>${round(reduced)} hrs reduced</strong></div>
+                <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
+              </div>
+            </div>
           </div>
         </section>
       `;
@@ -249,39 +277,6 @@
     function pill(label, active, action, value){
       return `
         <button type="button" class="${cx('rounded-full px-3 py-1 border text-sm transition', active ? 'bg-yellow-400 text-slate-900 border-transparent' : 'bg-[#0a1124] text-slate-200 hover:bg-white/10 border-white/10')}" data-action="${action}" data-value="${String(value)}">${label}</button>
-      `;
-    }
-
-    function kpi(icon,label,value,hint){
-      return `
-        <div class="rounded-2xl border border-white/10 bg-[#0b1328] p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-xs text-slate-300">${label}</div>
-              <div class="text-xl font-semibold">${value}</div>
-            </div>
-            <i data-lucide="${icon}" class="w-5 h-5 text-sky-300" aria-hidden="true"></i>
-          </div>
-          ${hint ? `<div class="mt-1 text-xs text-slate-400">${hint}</div>` : ''}
-        </div>
-      `;
-    }
-
-    function numInput(label, key, value){
-      return `
-        <label class="flex flex-col gap-1">
-          <span class="text-xs text-slate-300">${label}</span>
-          <input class="rounded-xl border border-white/10 bg-[#0b1328] px-3 py-2 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}">
-        </label>
-      `;
-    }
-
-    function kv(label, value){
-      return `
-        <div class="flex items-center justify-between rounded-lg bg-black/20 px-3 py-2">
-          <span class="text-slate-300">${label}</span>
-          <span class="font-semibold">${value}</span>
-        </div>
       `;
     }
 
@@ -345,6 +340,39 @@
 
           <p class="text-xs text-slate-400">Transparency: Recast AW complements device management (e.g., Intune). Windows/macOS focus. Metrics are illustrative; actuals vary.</p>
         </section>
+      `;
+    }
+
+    function kpi(icon,label,value,hint){
+      return `
+        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-xs text-slate-300">${label}</div>
+              <div class="text-xl font-semibold">${value}</div>
+            </div>
+            <i data-lucide="${icon}" class="w-5 h-5 text-sky-300" aria-hidden="true"></i>
+          </div>
+          ${hint ? `<div class="mt-1 text-xs text-slate-400">${hint}</div>` : ''}
+        </div>
+      `;
+    }
+
+    function numInput(label, key, value){
+      return `
+        <label class="flex flex-col gap-1">
+          <span class="text-xs text-slate-300">${label}</span>
+          <input class="rounded-xl border border-white/10 bg-[#0b1328] px-3 py-2 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}">
+        </label>
+      `;
+    }
+
+    function kv(label, value){
+      return `
+        <div class="flex items-center justify-between rounded-lg bg-black/20 px-3 py-2">
+          <span class="text-slate-300">${label}</span>
+          <span class="font-semibold">${value}</span>
+        </div>
       `;
     }
 
