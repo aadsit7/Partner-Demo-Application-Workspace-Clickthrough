@@ -90,7 +90,7 @@
           </div>
           <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
             <h1 class="text-3xl sm:text-4xl font-extrabold leading-tight">
-              <span class="${STATE.activeTab==='problems' ? 'text-white' : 'text-blue-500'}">Recast Software</span>
+              <span class="text-white">Recast Software</span>
             </h1>
             <p class="mt-2 max-w-2xl text-slate-300">
               ${STATE.activeTab==='problems'
@@ -281,7 +281,7 @@
             <div class="flex items-center gap-2">
               <div class="h-6 w-6 rounded-lg bg-gradient-to-br from-sky-500 via-indigo-500 to-fuchsia-500 grid place-items-center"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
               <div>
-                <h3 class="text-base font-semibold">Application Workspace</h3>
+                <h3 class="text-base font-semibold">Recast Hub</h3>
                 <div class="text-[12px] text-slate-400">Curated & secured catalog</div>
               </div>
             </div>
@@ -585,7 +585,7 @@
       });
 
       const copyBtn=root.querySelector('[data-action="copy-onepager"]');
-      if(copyBtn) copyBtn.addEventListener('click', async ()=>{
+      ifcopy: if(copyBtn) copyBtn.addEventListener('click', async ()=>{
         const i = STATE.roiInputs;
         const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
         const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
