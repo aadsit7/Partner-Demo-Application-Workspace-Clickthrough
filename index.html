@@ -58,6 +58,7 @@
       ctx: { device: 'Windows', network: 'Corporate', compliant: true },
       packHrs: 8, configHrs: 2, currentHrs: 24,
       roiInputs: { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 },
+      copied: false,
       showLabels: false
     };
 
@@ -313,74 +314,110 @@
               `).join('')}
             </div>
 
-            <div class="mt-3 grid grid-cols-2 gap-2">
-              <div id="beforeCard" class="sub-card p-3">
-                <div class="flex items-center gap-2"><div class="h-7 w-7 rounded-full bg-rose-600/90 grid place-items-center"><i data-lucide="alert-octagon" class="w-4 h-4"></i></div><div class="font-medium">Before</div></div>
-                <div class="mt-2 text-[13px] text-slate-300 flex items-center gap-2"><i data-lucide="hourglass" class="w-4 h-4"></i> Waiting for ticket / correct route…</div>
-                <div class="mt-1 text-[11px] text-slate-400">Zero-day rollout: <span class="font-semibold">${STATE.currentHrs} hrs</span></div>
-              </div>
-              <div id="afterCard" class="sub-card p-3 opacity-50">
-                <div class="flex items-center gap-2"><div class="h-7 w-7 rounded-full bg-emerald-500/90 grid place-items-center"><i data-lucide="check-circle-2" class="w-4 h-4 text-black"></i></div><div class="font-medium">After (Recast)</div></div>
-                <div class="mt-2 user-beam bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400" style="--d:2.1s"></div>
+            <!-- End user (single card that turns red → green) -->
+            <div class="mt-3">
+              <div id="endUserCard" class="sub-card p-3">
+                <div class="flex items-center gap-3">
+                  <div id="endUserAvatar" class="h-9 w-9 rounded-full bg-rose-600/90 grid place-items-center font-semibold">U</div>
+                  <div class="text-sm">
+                    <div class="font-medium text-slate-200">End user</div>
+                    <div class="text-slate-400">Apps on demand — no waiting, no tickets.</div>
+                  </div>
+                </div>
+                <div class="mt-3 user-beam bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400" style="--d:2.1s"></div>
                 <div class="relative mt-2 rounded-lg border border-white/10 bg-[#0b1328] p-4">
                   <i data-lucide="laptop" class="h-5 w-5 opacity-80"></i>
-                  <div class="absolute right-2 top-2 badge bg-green-500 text-black grid place-items-center font-bold" style="--d:2.4s">✓</div>
+                  <div id="endUserBadge" class="absolute right-2 top-2 badge bg-rose-500 text-black grid place-items-center font-bold" style="--d:2.4s">!</div>
                   <div class="mt-1 text-[11px] text-slate-400">Workspace launches the correct app instantly</div>
                 </div>
-                <div class="mt-1 text-[11px] text-slate-400">Zero-day rollout: <span class="font-semibold">~1.5 hrs</span></div>
               </div>
+              <div id="flowSuccess" class="mt-2 hidden text-emerald-300 text-[13px] inline-flex items-center gap-1"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere.</span></div>
             </div>
-
-            <div id="flowSuccess" class="mt-2 hidden text-emerald-300 text-[13px] inline-flex items-center gap-1"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere. Before fades; After lights up.</span></div>
           </div>
         </div>
       `;
     }
 
-    /* ---------- Tab 3: Impact & ROI ---------- */
+    /* ---------- Tab 3: Impact & ROI (restored full version) ---------- */
     function renderROI(){
-      const i=STATE.roiInputs;
-      const hoursFromMinutes=(STATE.impact.minutes*i.users)/60;
-      const total=hoursFromMinutes+STATE.impact.pkgHours+STATE.impact.riskHrs;
-      const savedMonth=total*i.loadedCostPerHour;
-      const savedYear=savedMonth*12;
-      const netYear=savedYear-i.recastAnnualCost;
-      const roiPct=i.recastAnnualCost?(netYear/i.recastAnnualCost)*100:0;
+      const i = STATE.roiInputs;
+      const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
+      const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
+      const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
+      const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
+      const dollarSavedYear = dollarSavedMonth * 12;
+      const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
+      const roiPct = i.recastAnnualCost ? (netBenefitYear / i.recastAnnualCost) * 100 : 0;
+      const fteHoursYear = 2080;
+      const fteEquivalent = (totalHoursSavedMonth * 12) / fteHoursYear;
 
       return `
         <section id="panel-roi" class="space-y-3">
           <div class="section-card p-3"><div class="text-sm font-medium">Application Workspace pays for itself in weeks, not years.</div></div>
-          <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            ${kpi('timer','Hours saved / mo', round(total))}
-            ${kpi('line-chart','$ saved / yr', '$'+num(savedYear))}
-            ${kpi('percent','ROI', round(roiPct)+'%')}
+
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
+            ${kpi('timer','Hours saved / mo', round(totalHoursSavedMonth), 'Per-user minutes × users + packaging + zero-day')}
+            ${kpi('line-chart','$ saved / yr', `$${num(dollarSavedYear)}`, 'Illustrative only')}
+            ${kpi('percent','ROI', `${round(roiPct)}%`, 'Net of subscription')}
+            ${kpi('rocket','Tickets / mo', num(ticketsMonth), 'Scale context')}
           </div>
-          <details class="section-card p-3">
-            <summary class="cursor-pointer list-none text-sm font-semibold">Assumptions (edit)</summary>
-            <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
-              ${numInput('# users','users', i.users)}
-              ${numInput('Tickets per user / mo','ticketsPerUserPerMonth', i.ticketsPerUserPerMonth)}
-              ${numInput('Avg handle (mins)','avgHandleMins', i.avgHandleMins)}
-              ${numInput('Loaded cost ($/hr)','loadedCostPerHour', i.loadedCostPerHour)}
-              ${numInput('Recast annual cost ($)','recastAnnualCost', i.recastAnnualCost)}
+
+          <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
+            <div class="section-card p-4 lg:col-span-2">
+              <h3 class="text-base font-semibold">Assumptions (edit)</h3>
+              <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                ${numInput('# users','users', i.users)}
+                ${numInput('Tickets per user / mo','ticketsPerUserPerMonth', i.ticketsPerUserPerMonth)}
+                ${numInput('Avg handle (mins)','avgHandleMins', i.avgHandleMins)}
+                ${numInput('Loaded cost ($/hr)','loadedCostPerHour', i.loadedCostPerHour)}
+                ${numInput('Recast annual cost ($)','recastAnnualCost', i.recastAnnualCost)}
+              </div>
+              <div class="mt-3 text-[11px] text-slate-400">All values are examples. Replace with your data for accurate estimates.</div>
             </div>
-            <p class="mt-2 text-[11px] text-slate-400">Illustrative only. Replace with your data for accurate estimates.</p>
-          </details>
+
+            <div class="section-card p-4">
+              <h3 class="text-base font-semibold">Results</h3>
+              <div class="mt-3 space-y-2 text-sm">
+                ${kv('Hours saved / month', round(totalHoursSavedMonth))}
+                ${kv('$ saved / month', `$${num(dollarSavedMonth)}`)}
+                ${kv('$ saved / year', `$${num(dollarSavedYear)}`)}
+                ${kv('Net benefit / year', `$${num(netBenefitYear)}`)}
+                ${kv('ROI', `${round(roiPct)}%`)}
+                ${kv('Equivalent IT FTEs freed', round(fteEquivalent))}
+              </div>
+              <div class="mt-2 text-[11px] text-slate-400 italic">Add a short customer proof-point here (e.g., “Cut packaging time by 80% in first 30 days”).</div>
+              <div class="mt-4 flex flex-wrap gap-2">
+                <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20 focus-ring">Reset</button>
+                <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:brightness-95 focus-ring">
+                  <i data-lucide="clipboard" class="w-4 h-4"></i> ${STATE.copied ? 'Copied!' : 'Copy executive one-pager'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-slate-400">Transparency: Recast AW complements device management (e.g., Intune). Windows/macOS focus. Metrics are illustrative; actuals vary.</p>
         </section>
       `;
     }
-    function kpi(icon,label,value){
+    function kpi(icon,label,value,hint){
       return `
         <div class="section-card p-3">
           <div class="flex items-center justify-between">
-            <div><div class="text-[11px] text-slate-300">${label}</div><div class="text-xl font-semibold">${value}</div></div>
+            <div>
+              <div class="text-[11px] text-slate-300">${label}</div>
+              <div class="text-xl font-semibold">${value}</div>
+            </div>
             <i data-lucide="${icon}" class="w-5 h-5 text-sky-300"></i>
           </div>
+          ${hint ? `<div class="mt-1 text-[11px] text-slate-400">${hint}</div>` : ''}
         </div>
       `;
     }
     function numInput(label,key,value){
       return `<label class="flex flex-col gap-1 text-sm"><span class="text-[12px] text-slate-300">${label}</span><input class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-1.5 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
+    }
+    function kv(label,value){
+      return `<div class="flex items-center justify-between rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">${label}</span><span class="font-semibold">${value}</span></div>`;
     }
 
     /* ---------- Realistic Catalog (brand-like marks) ---------- */
@@ -485,6 +522,57 @@
         const key=e.currentTarget.getAttribute('data-key'); const v=Number(String(e.target.value).replace(/[^0-9.\-]/g,'')); STATE.roiInputs[key]=isFinite(v)?v:0;
       }));
 
+      const resetCalc=root.querySelector('[data-action="reset-calculator"]');
+      if(resetCalc) resetCalc.addEventListener('click', ()=>{
+        STATE.roiInputs = { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 };
+        STATE.impact = { ...STATE.defaults.impact };
+        STATE.copied = false;
+        render();
+      });
+
+      const copyBtn=root.querySelector('[data-action="copy-onepager"]');
+      if(copyBtn) copyBtn.addEventListener('click', async ()=>{
+        const i = STATE.roiInputs;
+        const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
+        const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
+        const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
+        const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
+        const dollarSavedYear = dollarSavedMonth * 12;
+        const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
+        const roiPct = i.recastAnnualCost ? (netBenefitYear / i.recastAnnualCost) * 100 : 0;
+        const fteHoursYear = 2080;
+        const fteEquivalent = (totalHoursSavedMonth * 12) / fteHoursYear;
+        const body =
+`Recast Application Workspace — Executive One-Pager
+
+Assumptions
+ - Users: ${i.users}
+ - Tickets per user / month: ${i.ticketsPerUserPerMonth}
+ - Avg handle: ${i.avgHandleMins} mins
+ - Loaded cost: $${i.loadedCostPerHour}/hr
+ - Subscription (annual): $${i.recastAnnualCost}
+
+Observed demo impact (illustrative)
+ - Minutes saved per user (monthly): ${STATE.impact.minutes}
+ - Packaging hours avoided (org): ${STATE.impact.pkgHours}
+ - Zero-day window reduced (hrs): ${STATE.impact.riskHrs}
+
+Calculated outcomes
+ - Tickets / month: ${num(ticketsMonth)}
+ - Hours saved / month: ${round(totalHoursSavedMonth)}
+ - $ saved / month: $${num(dollarSavedMonth)}
+ - $ saved / year: $${num(dollarSavedYear)}
+ - Net benefit / year: $${num(netBenefitYear)}
+ - ROI: ${round(roiPct)}%
+ - Equivalent IT FTEs freed: ${round(fteEquivalent)}
+
+Notes: Illustrative; replace with your data.`;
+        try { await navigator.clipboard.writeText(body); } catch {
+          const ta=document.createElement('textarea'); ta.value=body; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        }
+        STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
+      });
+
       const startBtn=root.querySelector('[data-action="start-flow"]'); if(startBtn) startBtn.addEventListener('click', startFlow);
       const resetBtn=root.querySelector('[data-action="reset-flow"]'); if(resetBtn) resetBtn.addEventListener('click', resetFlow);
       const toggleLabels=root.querySelector('[data-action="toggle-labels"]'); if(toggleLabels) toggleLabels.addEventListener('click', ()=>{ STATE.showLabels=!STATE.showLabels; buildFlow(); });
@@ -516,8 +604,11 @@
       buildTiles(document.getElementById('flowDevB'), 10, 1.55);
       buildTiles(document.getElementById('flowDevC'), 10, 1.6);
 
-      const before=document.getElementById('beforeCard'); const after=document.getElementById('afterCard');
-      if(before && after){ before.style.opacity='1'; after.style.opacity='.5'; }
+      // Reset end-user state to "red"
+      const avatar=document.getElementById('endUserAvatar');
+      const badge=document.getElementById('endUserBadge');
+      if(avatar){ avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); avatar.textContent='U'; }
+      if(badge){ badge.textContent='!'; badge.classList.remove('bg-green-500'); badge.classList.add('bg-rose-500'); }
     }
     function buildTiles(container,count,baseDelay){
       if(!container) return; container.innerHTML='';
@@ -527,21 +618,26 @@
     function startFlow(){
       const card=document.getElementById('flowCard'); if(!card) return;
       card.classList.remove('run'); void card.offsetWidth; card.classList.add('run');
-      const before=document.getElementById('beforeCard'); const after=document.getElementById('afterCard');
       const flash=document.getElementById('flowHubFlash'); const success=document.getElementById('flowSuccess');
+      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
       if(flash){ flash.classList.remove('hidden'); setTimeout(()=>flash.classList.add('hidden'),1000); }
       if(success) success.classList.add('hidden');
-      if(before && after){ before.style.opacity='1'; after.style.opacity='.5'; }
-      setTimeout(()=>{ if(before) before.style.opacity='.35'; if(after) after.style.opacity='1'; }, 2000);
+      // Turn end user green after flow complete
+      setTimeout(()=>{
+        if(avatar){ avatar.classList.remove('bg-rose-600/90'); avatar.classList.add('bg-emerald-500'); }
+        if(badge){ badge.textContent='✓'; badge.classList.remove('bg-rose-500'); badge.classList.add('bg-green-500'); }
+      }, 2100);
       setTimeout(()=> success && success.classList.remove('hidden'), 2500);
       setTimeout(()=> card.classList.remove('run'), 6000);
     }
     function resetFlow(){
       const card=document.getElementById('flowCard'); if(!card) return;
       card.classList.remove('run');
-      const before=document.getElementById('beforeCard'); const after=document.getElementById('afterCard'); const success=document.getElementById('flowSuccess');
-      if(before && after){ before.style.opacity='1'; after.style.opacity='.5'; }
-      if(success) success.classList.add('hidden');
+      const success=document.getElementById('flowSuccess'); if(success) success.classList.add('hidden');
+      // Reset end user to red
+      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
+      if(avatar){ avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); }
+      if(badge){ badge.textContent='!'; badge.classList.remove('bg-green-500'); badge.classList.add('bg-rose-500'); }
     }
 
     /* ---------- Init ---------- */
