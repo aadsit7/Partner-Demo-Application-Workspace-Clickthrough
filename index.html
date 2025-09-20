@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Recast — Executive Click-Through (Branded)</title>
+  <title>Recast — Realistic App Catalog Click-Through</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -13,6 +13,31 @@
   <style>
     .focus-ring:focus-visible{outline:2px solid #facc15; outline-offset: 2px}
     html,body{font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"}
+    .tile{width:.5rem;height:.5rem;border-radius:.25rem;background:#334155;opacity:.9}
+    .run .tile{animation: tilePulse 1.1s ease-in-out var(--d,0s) 1 forwards}
+    @keyframes tilePulse{0%{transform:scale(.7);background:#334155;opacity:.4}60%{transform:scale(1);background:#38bdf8;opacity:1}100%{background:#334155;opacity:.9}}
+    .flow-bar{height:.25rem;border-radius:.25rem;transform-origin:left center;transform:scaleX(0)}
+    .run .flow-bar{animation: barGrow 1s ease forwards var(--d,0s)}
+    @keyframes barGrow{to{transform:scaleX(1)}}
+    .bolt-line{width:.25rem;border-radius:.25rem;transform-origin:top center;transform:scaleY(0)}
+    .run .bolt-line{animation: boltDrop .9s ease forwards var(--d,0s)}
+    @keyframes boltDrop{to{transform:scaleY(1)}}
+    .logo-tile{width:3.25rem}
+    .logo-ring{width:2.25rem;height:2.25rem;border-radius:9999px;display:grid;place-items:center;background:#0a1226;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+    .app-label{font-size:.66rem}
+    .run .logo-ring{animation: appPop .9s cubic-bezier(.2,.8,.2,1) var(--d,0s) 1 forwards}
+    @keyframes appPop{0%{transform:scale(.85);filter:saturate(.4);opacity:.6}60%{transform:scale(1.05);filter:saturate(1);opacity:1}100%{transform:scale(1)}}
+
+    .cat-row{display:grid;grid-template-columns: 17ch 1fr;gap:.75rem;align-items:start}
+    .cat-title{font-size:.7rem;letter-spacing:.08em}
+
+    .user-beam{height:.4rem;border-radius:.4rem;transform-origin:left center;transform:scaleX(0)}
+    .run .user-beam{animation: barGrow 1.1s ease forwards var(--d,0s)}
+    .user-line{width:.25rem;border-radius:.25rem;transform-origin:top center;transform:scaleY(0)}
+    .run .user-line{animation: boltDrop 1s ease forwards var(--d,0s)}
+    .badge{width:1.25rem;height:1.25rem;border-radius:.3rem;opacity:0;transform:translateY(-6px) scale(.9)}
+    .run .badge{animation: badgeDrop .9s ease-out var(--d,0s) forwards}
+    @keyframes badgeDrop{to{opacity:1;transform:translateY(0) scale(1)}}
   </style>
 </head>
 <body class="min-h-screen bg-[#0b1020] text-slate-100 antialiased">
@@ -20,7 +45,7 @@
 
   <script>
     const STATE = {
-      activeTab: 'problems',
+      activeTab: 'solution',
       impact: { minutes: 9, pkgHours: 191.2, riskHrs: 0 },
       defaults: { impact: { minutes: 9, pkgHours: 191.2, riskHrs: 0 } },
       ctx: { device: 'Windows', network: 'Corporate', compliant: true },
@@ -43,12 +68,6 @@
       { id: 'roi', label: 'Impact & ROI', icon: 'bar-chart-3' }
     ];
 
-    function track(event, payload = {}) {
-      window.__recastAnalytics = window.__recastAnalytics || [];
-      window.__recastAnalytics.push({ ts: Date.now(), event, payload });
-      try { console.log('[analytics]', event, payload); } catch {}
-    }
-
     function cx(...a){ return a.filter(Boolean).join(' '); }
     function round(n){ return Math.round(n * 100) / 100; }
     function num(n){ return new Intl.NumberFormat().format(Math.round(n)); }
@@ -67,24 +86,13 @@
             <div class="absolute -top-24 right-0 h-[360px] w-[360px] blur-[120px] rounded-full bg-gradient-to-br from-fuchsia-400/25 via-purple-500/20 to-sky-500/25"></div>
           </div>
           <div class="relative mx-auto max-w-7xl px-4 pt-10 pb-8">
-            <h1 h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-  <span class="text-blue-500">Recast Software</span>
-            </h1>
-            <p class="mt-3 max-w-3xl text-slate-300">App deployment isn’t the problem. Doing it fast, consistently, and securely across the business is. — Microsoft MVP</p>
+            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight"><span class="text-blue-500">Recast Software</span></h1>
+            <p class="mt-3 max-w-3xl text-slate-300">Configure once, deliver everywhere — a realistic app catalog click-through.</p>
           </div>
           <div class="relative mx-auto max-w-7xl px-4">
             <div role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded-full bg-[#0b152f] p-1 ring-1 ring-white/10">
               ${TABS.map(t => `
-                <button
-                  type="button"
-                  class="${cx('group inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm sm:text-base focus-ring transition', STATE.activeTab === t.id ? 'bg-yellow-400 text-slate-900' : 'text-slate-200 hover:bg-white/5')}"
-                  role="tab"
-                  id="tab-${t.id}"
-                  aria-selected="${STATE.activeTab === t.id}"
-                  aria-controls="panel-${t.id}"
-                  data-action="switch-tab"
-                  data-tab="${t.id}"
-                >
+                <button type="button" class="${cx('group inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm sm:text-base focus-ring transition', STATE.activeTab === t.id ? 'bg-yellow-400 text-slate-900' : 'text-slate-200 hover:bg-white/5')}" role="tab" id="tab-${t.id}" aria-selected="${STATE.activeTab === t.id}" aria-controls="panel-${t.id}" data-action="switch-tab" data-tab="${t.id}">
                   <i data-lucide="${t.icon}" class="w-4 h-4" aria-hidden="true"></i>
                   <span>${t.label}</span>
                 </button>
@@ -102,18 +110,13 @@
           <section class="mt-6">${renderActivePanel()}</section>
         </main>
       `;
-      if (window.lucide && window.lucide.createIcons) {
-        try { window.lucide.createIcons(); } catch {}
-      }
+      if (window.lucide && window.lucide.createIcons) { try { window.lucide.createIcons(); } catch {} }
       attachGlobalEvents();
+      if (STATE.activeTab === 'solution') { buildFlow(); }
     }
 
     function renderMetricChip(label, value, tone){
-      const tones = {
-        emerald: 'from-emerald-400/80 to-teal-400/80',
-        sky: 'from-sky-400/80 to-indigo-400/80',
-        yellow: 'from-yellow-300/90 to-amber-400/90'
-      };
+      const tones = { emerald: 'from-emerald-400/80 to-teal-400/80', sky: 'from-sky-400/80 to-indigo-400/80', yellow: 'from-yellow-300/90 to-amber-400/90' };
       return `
         <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
           <div class="text-xs text-slate-300">${label}</div>
@@ -126,77 +129,10 @@
     }
 
     function renderActivePanel(){
-      if (STATE.activeTab === 'problems') return renderProblems();
       if (STATE.activeTab === 'solution') return renderSolution();
+      if (STATE.activeTab === 'problems') return '<div class="text-slate-300">Use the Recast Approach tab for the new realistic catalog demo.</div>';
       if (STATE.activeTab === 'roi') return renderROI();
       return '';
-    }
-
-    function renderProblems(){
-      const problems = [
-        { key: 'frag', title: 'Fragmented delivery', sub: 'Windows / Mac / VDI / Web — users guess the right way.', icon: 'layers' },
-        { key: 'package', title: 'Packaging backlog', sub: 'Rebuild per version; updates stall.', icon: 'boxes' },
-        { key: 'zeroday', title: 'Zero-day exposure', sub: 'Patching takes days, not minutes.', icon: 'shield' },
-        { key: 'migration', title: 'Slow upgrades', sub: 'Stuck to old images; change is slow.', icon: 'layout-grid' }
-      ];
-      return `
-        <section role="tabpanel" id="panel-problems" aria-labelledby="tab-problems">
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            ${problems.map(p => `
-              <article class="group flex h-full flex-col gap-2 rounded-2xl border border-white/10 bg-[#0c142b] p-5">
-                <div class="flex items-center gap-2">
-                  <i data-lucide="${p.icon}" class="w-5 h-5 text-sky-300" aria-hidden="true"></i>
-                  <h3 class="text-lg font-semibold">${p.title}</h3>
-                </div>
-                <p class="text-sm text-slate-300">${p.sub}</p>
-              </article>
-            `).join('')}
-          </div>
-
-          <p class="mt-6 text-sm text-slate-300">Outcome first: apps that just work — always current and secure — without constant IT firefighting.</p>
-
-          <div class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-3">
-            ${brandCallout('alert-triangle','Why change',[
-              'App delivery is siloed and slow.',
-              'Manual work drains scarce IT time and talent.',
-              'Every delay leaves the business more exposed to risk'
-            ])}
-            ${brandCallout('clock-4','Why now',[
-  'Updates never stop — apps and systems change every few weeks.',
-  'Rules are getting stricter — regulators and insurers demand proof of fast patching.',
-  'Legacy platforms are hitting end-of-life — forcing costly upgrades and app rework.'
-])}
-
-            ${brandCallout('sparkles','Why Recast',[
-              'Deliver apps faster with one workspace across all devices.',
-              'Configure once, deploy anywhere, patch automatically.',
-              'Zero-day closed in hours, not days.'
-            ], true)}
-          </div>
-        </section>
-      `;
-    }
-
-    function brandCallout(icon,label,bullets,showCTA=false){
-      return `
-        <div class="relative rounded-2xl border border-white/10 bg-[#0c142b] p-4">
-          <div class="flex items-center gap-2 text-sm font-semibold">
-            <i data-lucide="${icon}" class="w-4 h-4 text-amber-400" aria-hidden="true"></i>
-            <span>${label}</span>
-          </div>
-          <ul class="mt-2 list-disc pl-5 text-sm text-slate-300">
-            ${bullets.map(b=>`<li>${b}</li>`).join('')}
-          </ul>
-          ${showCTA ? `
-            <div class="mt-4 flex justify-end">
-              <button type="button" data-action="advance" data-next="solution" class="inline-flex items-center gap-2 rounded-full bg-[#e76a1f] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 focus-ring">
-                <i data-lucide="arrow-right" class="w-4 h-4" aria-hidden="true"></i>
-                How Recast solves it
-              </button>
-            </div>
-          ` : ''}
-        </div>
-      `;
     }
 
     function renderSolution(){
@@ -206,69 +142,12 @@
       const route = routeRecommendation(STATE.ctx);
       return `
         <section role="tabpanel" id="panel-solution" aria-labelledby="tab-solution" class="space-y-4">
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div class="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-[#0c142b] p-5">
-              <div class="flex items-center gap-2">
-                <span aria-hidden="true">🖥️</span>
-                <h3 class="text-lg font-semibold">One Icon, Always the Right App</h3>
-              </div>
-              <p class="text-sm text-slate-300">Users click once. Workspace chooses the right version (Windows, Mac, Web, VPN, VDI) automatically.</p>
-              <div class="mt-2 grid grid-cols-3 gap-2 text-sm">
-                ${['Windows','Mac'].map(d=>pill(d, STATE.ctx.device===d, 'set-device', d)).join('')}
-                ${['Corporate','VPN'].map(n=>pill(n, STATE.ctx.network===n, 'set-network', n)).join('')}
-                ${pill(STATE.ctx.compliant?'Compliant':'Non-compliant', STATE.ctx.compliant, 'toggle-compliance', '')}
-              </div>
-              <div class="text-sm text-slate-300">Recommended route:</div>
-              <div class="inline-flex w-fit items-center gap-2 rounded-full bg-yellow-400 px-3 py-1 text-slate-900">
-                <i data-lucide="check-circle-2" class="w-4 h-4" aria-hidden="true"></i> ${route}
-              </div>
-              <div class="mt-auto">
-                <button type="button" class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs hover:bg-white/20" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact</button>
-              </div>
-            </div>
-
-            <div class="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-[#0c142b] p-5">
-              <div class="flex items-center gap-2">
-                <span aria-hidden="true">⚙️</span>
-                <h3 class="text-lg font-semibold">Update Once, Deploy Everywhere</h3>
-              </div>
-              <p class="text-sm text-slate-300">Package an app one time and roll it out across all environments (cloud, on-prem, hybrid) with staged rollouts.</p>
-              <div class="rounded-xl border border-white/10 bg-[#0a1124] p-4 text-sm">
-                <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-2" class="w-4 h-4" aria-hidden="true"></i> Roll out critical app updates</div>
-                <label class="mt-2 flex flex-col gap-1">
-                  <span class="text-xs text-slate-400">Hours per package → configure</span>
-                  <div class="flex items-center gap-2">
-                    <input aria-label="Hours per package" class="w-20 rounded bg-slate-950 px-2 py-1" inputmode="decimal" value="${STATE.packHrs}" data-action="set-pack-hrs">
-                    <span>→</span>
-                    <input aria-label="Hours to configure" class="w-20 rounded bg-slate-950 px-2 py-1" inputmode="decimal" value="${STATE.configHrs}" data-action="set-config-hrs">
-                  </div>
-                </label>
-                <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span>${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong>${saved} hrs saved</strong></div>
-                <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-300">
-                  <span class="rounded-full bg-black/30 px-2 py-1" aria-hidden="true">☁️ Cloud</span>
-                  <span class="rounded-full bg-black/30 px-2 py-1" aria-hidden="true">🖥️ On-Prem</span>
-                  <span class="rounded-full bg-black/30 px-2 py-1" aria-hidden="true">🔀 Hybrid</span>
-                </div>
-                <div class="mt-1 text-xs text-slate-400">One console → multiple tenants (A, B, C) with staged rollouts.</div>
-                <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
-              </div>
-            </div>
-
-            <div class="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-[#0c142b] p-5">
-              <div class="flex items-center gap-2">
-                <span aria-hidden="true">🛡️</span>
-                <h3 class="text-lg font-semibold">Zero-Day Patches in Hours</h3>
-              </div>
-              <p class="text-sm text-slate-300">Security fixes roll out in 1–2 hours instead of a full day, cutting exposure windows by 90%.</p>
-              <div class="rounded-xl border border-white/10 bg-[#0a1124] p-4 text-sm">
-                <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4" aria-hidden="true"></i> Zero-day rollout</div>
-                <label class="mt-2 flex flex-col gap-1">
-                  <span class="text-xs text-slate-400">Current time-to-deploy (hrs)</span>
-                  <input class="rounded bg-slate-950 px-2 py-1" aria-label="Current time to deploy (hours)" inputmode="decimal" value="${STATE.currentHrs}" data-action="set-current-hrs">
-                </label>
-                <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span>${STATE.currentHrs} → 1.5 hrs</span><strong>${round(reduced)} hrs reduced</strong></div>
-                <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
-              </div>
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            ${renderFlow(route)}
+            <div class="flex flex-col gap-4">
+              ${renderApproachCard_UpdateOnce(saved)}
+              ${renderApproachCard_ZeroDay(reduced)}
+              ${renderApproachCard_OneIcon(route)}
             </div>
           </div>
         </section>
@@ -276,22 +155,347 @@
     }
 
     function pill(label, active, action, value){
+      return `<button type="button" class="${cx('rounded-full px-3 py-1 border text-sm transition', active ? 'bg-yellow-400 text-slate-900 border-transparent' : 'bg-[#0a1124] text-slate-200 hover:bg-white/10 border-white/10')}" data-action="${action}" data-value="${String(value)}">${label}</button>`;
+    }
+
+    function renderApproachCard_OneIcon(route){
       return `
-        <button type="button" class="${cx('rounded-full px-3 py-1 border text-sm transition', active ? 'bg-yellow-400 text-slate-900 border-transparent' : 'bg-[#0a1124] text-slate-200 hover:bg-white/10 border-white/10')}" data-action="${action}" data-value="${String(value)}">${label}</button>
+        <div class="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-[#0c142b] p-5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true">🖥️</span>
+            <h3 class="text-lg font-semibold">One App, Always the Right Version</h3>
+          </div>
+          <p class="text-sm text-slate-300">Users click once. Workspace chooses the right version (Windows, Mac, Web, VPN, VDI) automatically.</p>
+          <div class="mt-2 grid grid-cols-3 gap-2 text-sm">
+            ${['Windows','Mac'].map(d=>pill(d, STATE.ctx.device===d, 'set-device', d)).join('')}
+            ${['Corporate','VPN'].map(n=>pill(n, STATE.ctx.network===n, 'set-network', n)).join('')}
+            ${pill(STATE.ctx.compliant?'Compliant':'Non-compliant', STATE.ctx.compliant, 'toggle-compliance', '')}
+          </div>
+          <div class="text-sm text-slate-300">Recommended route:</div>
+          <div class="inline-flex w-fit items-center gap-2 rounded-full bg-yellow-400 px-3 py-1 text-slate-900">
+            <i data-lucide="check-circle-2" class="w-4 h-4" aria-hidden="true"></i> ${route}
+          </div>
+          <div class="mt-auto">
+            <button type="button" class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs hover:bg-white/20" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderApproachCard_UpdateOnce(saved){
+      return `
+        <div class="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-[#0c142b] p-5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true">⚙️</span>
+            <h3 class="text-lg font-semibold">Update Once, Deploy Everywhere</h3>
+          </div>
+          <p class="text-sm text-slate-300">Package an app one time and roll it out across all environments (cloud, on-prem, hybrid) with staged rollouts.</p>
+          <div class="rounded-xl border border-white/10 bg-[#0a1124] p-4 text-sm">
+            <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-2" class="w-4 h-4" aria-hidden="true"></i> Roll out critical app updates</div>
+            <label class="mt-2 flex flex-col gap-1">
+              <span class="text-xs text-slate-400">Hours per package → configure</span>
+              <div class="flex items-center gap-2">
+                <input aria-label="Hours per package" class="w-20 rounded bg-slate-950 px-2 py-1" inputmode="decimal" value="${STATE.packHrs}" data-action="set-pack-hrs">
+                <span>→</span>
+                <input aria-label="Hours to configure" class="w-20 rounded bg-slate-950 px-2 py-1" inputmode="decimal" value="${STATE.configHrs}" data-action="set-config-hrs">
+              </div>
+            </label>
+            <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span>${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong>${saved} hrs saved</strong></div>
+            <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-300">
+              <span class="rounded-full bg-black/30 px-2 py-1" aria-hidden="true">☁️ Cloud</span>
+              <span class="rounded-full bg-black/30 px-2 py-1" aria-hidden="true">🖥️ On-Prem</span>
+              <span class="rounded-full bg-black/30 px-2 py-1" aria-hidden="true">🔀 Hybrid</span>
+            </div>
+            <div class="mt-1 text-xs text-slate-400">One console → multiple tenants (A, B, C) with staged rollouts.</div>
+            <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderApproachCard_ZeroDay(reduced){
+      return `
+        <div class="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-[#0c142b] p-5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true">🛡️</span>
+            <h3 class="text-lg font-semibold">Zero-Day Patches in Hours</h3>
+          </div>
+          <p class="text-sm text-slate-300">Security fixes roll out in 1–2 hours instead of a full day, cutting exposure windows by 90%.</p>
+          <div class="rounded-xl border border-white/10 bg-[#0a1124] p-4 text-sm">
+            <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4" aria-hidden="true"></i> Zero-day rollout</div>
+            <label class="mt-2 flex flex-col gap-1">
+              <span class="text-xs text-slate-400">Current time-to-deploy (hrs)</span>
+              <input class="rounded bg-slate-950 px-2 py-1" aria-label="Current time to deploy (hours)" inputmode="decimal" value="${STATE.currentHrs}" data-action="set-current-hrs">
+            </label>
+            <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span>${STATE.currentHrs} → 1.5 hrs</span><strong>${round(reduced)} hrs reduced</strong></div>
+            <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
+          </div>
+        </div>
+      `;
+    }
+
+    /* ---------- "Realistic" Catalog with brand-like logos (single-file, inline SVG) ---------- */
+    const CATALOG = [
+      {
+        title: 'Core Productivity Suites',
+        id: 'cat-core',
+        items: [
+          logo('Microsoft Word','W','#185ABD'),
+          logo('Microsoft Excel','X','#107C41'),
+          logo('PowerPoint','P','#D24726'),
+          logo('Outlook','O','#106EBE'),
+          logo('Microsoft Teams','T','#5B53D6'),
+          logo('Google Docs','Dc','#1A73E8'),
+          logo('Google Sheets','Sh','#1E8E3E'),
+          logo('Google Slides','Sl','#F9AB00')
+        ]
+      },
+      {
+        title: 'Messaging & Meetings',
+        id: 'cat-collab',
+        items: [
+          multiLogo('Slack',['#36C5F0','#2EB67D','#E01E5A','#ECB22E']),
+          logo('Zoom','Z','#0B5CFF'),
+          logo('Gmail','G','#EA4335'),
+          logo('Google Meet','GM','#0F9D58')
+        ]
+      },
+      {
+        title: 'Web Browsers',
+        id: 'cat-browsers',
+        items: [
+          triLogo('Google Chrome','#EA4335','#FBBC05','#34A853','#4285F4'),
+          ringLogo('Microsoft Edge','#0C8EC5','#0AA0A3'),
+          flameLogo('Mozilla Firefox','#FF7139','#FFCC00')
+        ]
+      },
+      {
+        title: 'Enterprise Apps',
+        id: 'cat-enterprise',
+        items: [
+          logo('Salesforce','SF','#00A1E0'),
+          logo('Workday','WD','#1F5BFF'),
+          logo('ServiceNow','SN','#81B29A'),
+          logo('SAP','SAP','#0A6ED1'),
+          logo('Oracle NetSuite','NS','#C74634')
+        ]
+      },
+      {
+        title: 'Security & Access',
+        id: 'cat-security',
+        items: [
+          logo('Duo','D','#3CB371'),
+          logo('Okta','O','#007DC1'),
+          logo('Ping Identity','P','#C0172C'),
+          logo('Cisco AnyConnect','AC','#00B5AD'),
+          logo('Microsoft Defender','MD','#0067B8'),
+          logo('CrowdStrike Falcon','CS','#D61F26')
+        ]
+      },
+      {
+        title: 'Storage & Creative',
+        id: 'cat-storage',
+        items: [
+          logo('Adobe Acrobat','A','#ED2224'),
+          logo('Dropbox','DB','#0061FF'),
+          logo('Box','BX','#0061D5'),
+          logo('OneDrive','OD','#0A5BD5'),
+          logo('ZoomIt / Sysinternals','ZI','#58595B')
+        ]
+      }
+    ];
+
+    function logo(name, letter, color){
+      return { name, svg: simpleMark(letter, color) };
+    }
+    function simpleMark(letter, color){
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="28" height="28" role="img" aria-label="${letter}">
+          <defs>
+            <linearGradient id="g${letter.replace(/\W/g,'')}" x1="0" x2="1">
+              <stop offset="0" stop-color="${shade(color,0.9)}"/><stop offset="1" stop-color="${shade(color,1.1)}"/>
+            </linearGradient>
+          </defs>
+          <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#g${letter.replace(/\W/g,'')})" stroke="rgba(255,255,255,.15)"/>
+          <text x="50%" y="56%" text-anchor="middle" font-size="26" font-family="Inter,Segoe UI,Arial" font-weight="800" fill="white">${letter}</text>
+        </svg>
+      `;
+    }
+    function multiLogo(name, colors){
+      const slices = colors.map((c,i)=>`<rect x="${3+i*10}" y="8" width="8" height="32" rx="4" fill="${c}"></rect>`).join('');
+      return { name, svg: `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="28" height="28" role="img" aria-label="${name}">
+          <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/>
+          ${slices}
+        </svg>` };
+    }
+    function triLogo(name,r1,r2,r3,r4){
+      return { name, svg: `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="28" height="28" aria-label="${name}">
+          <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/>
+          <circle cx="24" cy="24" r="14" fill="${r4}"/>
+          <path d="M24 10 A14 14 0 0 1 37 24 L24 24 Z" fill="${r1}"/>
+          <path d="M37 24 A14 14 0 0 1 24 38 L24 24 Z" fill="${r2}"/>
+          <path d="M24 38 A14 14 0 0 1 24 10 L24 24 Z" fill="${r3}"/>
+        </svg>` };
+    }
+    function ringLogo(name,c1,c2){
+      return { name, svg: `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="28" height="28" aria-label="${name}">
+          <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/>
+          <circle cx="24" cy="24" r="12" fill="${c1}"/>
+          <circle cx="20" cy="20" r="9" fill="${c2}"/>
+        </svg>` };
+    }
+    function flameLogo(name,c1,c2){
+      return { name, svg: `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="28" height="28" aria-label="${name}">
+          <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/>
+          <path d="M24 10c6 8-2 10 3 16 4 4 2 10-3 12-5-2-7-8-3-12 5-6-3-8 3-16z" fill="${c1}"/>
+          <circle cx="26" cy="28" r="5" fill="${c2}"/>
+        </svg>` };
+    }
+    function shade(hex, mult){
+      const c = hex.replace('#','');
+      const n = [0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16));
+      const s = n.map(v=>Math.max(0,Math.min(255,Math.round(v*mult))));
+      return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join('');
+    }
+
+    function renderFlow(route){
+      return `
+        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-5">
+          <div class="flex items-start justify-between">
+            <div>
+              <h3 class="text-lg font-semibold">Configure Once, Deliver Everywhere</h3>
+              <p class="mt-1 text-sm text-slate-300">A realistic app catalog with recognizable brands, flowing down through platforms, rings, and groups to the end user.</p>
+            </div>
+            <button type="button" data-action="start-flow" class="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-900">Start</button>
+          </div>
+
+          <div id="flowCard" class="mt-4 rounded-xl bg-[#0a1124] p-4 ring-1 ring-white/10" role="region" aria-label="Animated flow">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="h-7 w-7 rounded-xl bg-gradient-to-br from-sky-500 via-indigo-500 to-fuchsia-500 flex items-center justify-center">
+                  <i data-lucide="boxes" class="h-4 w-4 text-white"></i>
+                </div>
+                <div>
+                  <div class="text-slate-200 font-medium">Recast Hub</div>
+                  <div class="text-xs text-slate-400">Curated & secured catalog</div>
+                </div>
+              </div>
+              <div class="text-xs text-slate-400 inline-flex items-center gap-1"><i data-lucide="user-cog" class="h-4 w-4"></i> Admin publishes update</div>
+            </div>
+
+            <div class="mt-3 space-y-3">
+              ${CATALOG.map(section => `
+                <div class="cat-row">
+                  <div class="cat-title text-slate-400 uppercase">${section.title}</div>
+                  <div id="${section.id}" class="flex flex-wrap gap-3"></div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div id="flowHubFlash" class="mt-2 hidden text-amber-300 text-xs inline-flex items-center gap-1"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></div>
+
+            <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+              <div class="rounded-lg bg-black/30 p-3 ring-1 ring-white/10">
+                <div class="text-slate-300 text-sm inline-flex items-center gap-1"><i data-lucide="server" class="h-4 w-4"></i> Existing Platforms</div>
+                <div id="flowConnA" class="mt-2 grid grid-cols-10 gap-1.5" aria-hidden="true"></div>
+                <div class="mt-2 flow-bar w-full bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400" style="--d: .6s" aria-hidden="true"></div>
+              </div>
+              <div class="rounded-lg bg-black/30 p-3 ring-1 ring-white/10">
+                <div class="text-slate-300 text-sm inline-flex items-center gap-1"><i data-lucide="shield-check" class="h-4 w-4"></i> Staged Rings</div>
+                <div id="flowConnB" class="mt-2 grid grid-cols-10 gap-1.5" aria-hidden="true"></div>
+                <div class="mt-2 flow-bar w-full bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400" style="--d: .75s" aria-hidden="true"></div>
+              </div>
+              <div class="rounded-lg bg-black/30 p-3 ring-1 ring-white/10">
+                <div class="text-slate-300 text-sm inline-flex items-center gap-1"><i data-lucide="cloud" class="h-4 w-4"></i> Access & Policy</div>
+                <div id="flowConnC" class="mt-2 grid grid-cols-10 gap-1.5" aria-hidden="true"></div>
+                <div class="mt-2 flow-bar w-full bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400" style="--d: .9s" aria-hidden="true"></div>
+              </div>
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+              <div class="rounded-lg bg-black/30 p-3 ring-1 ring-white/10">
+                <div class="text-slate-300 text-sm">Business Unit</div>
+                <div id="flowGrpA" class="mt-2 grid grid-cols-8 gap-1.5" aria-hidden="true"></div>
+                <div class="mx-auto mt-2 bolt-line h-24 w-1 bg-gradient-to-b from-amber-300 via-white to-amber-300" style="--d: 1.1s" aria-hidden="true"></div>
+              </div>
+              <div class="rounded-lg bg-black/30 p-3 ring-1 ring-white/10">
+                <div class="text-slate-300 text-sm">Subsidiary</div>
+                <div id="flowGrpB" class="mt-2 grid grid-cols-8 gap-1.5" aria-hidden="true"></div>
+                <div class="mx-auto mt-2 bolt-line h-24 w-1 bg-gradient-to-b from-amber-300 via-white to-amber-300" style="--d: 1.25s" aria-hidden="true"></div>
+              </div>
+              <div class="rounded-lg bg-black/30 p-3 ring-1 ring-white/10">
+                <div class="text-slate-300 text-sm">Region</div>
+                <div id="flowGrpC" class="mt-2 grid grid-cols-8 gap-1.5" aria-hidden="true"></div>
+                <div class="mx-auto mt-2 bolt-line h-24 w-1 bg-gradient-to-b from-amber-300 via-white to-amber-300" style="--d: 1.4s" aria-hidden="true"></div>
+              </div>
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-3">
+              <div class="flex flex-col items-center gap-2">
+                <div class="rounded-xl bg-black/30 p-3 ring-1 ring-white/10 w-36 h-24">
+                  <i data-lucide="monitor-smartphone" class="h-6 w-6 text-slate-300"></i>
+                  <div id="flowDevA" class="mt-2 grid grid-cols-6 gap-1.5" aria-hidden="true"></div>
+                </div>
+                <div class="text-xs text-slate-400">Windows & macOS</div>
+              </div>
+              <div class="flex flex-col items-center gap-2">
+                <div class="rounded-xl bg-black/30 p-3 ring-1 ring-white/10 w-36 h-24">
+                  <i data-lucide="laptop" class="h-6 w-6 text-slate-300"></i>
+                  <div id="flowDevB" class="mt-2 grid grid-cols-6 gap-1.5" aria-hidden="true"></div>
+                </div>
+                <div class="text-xs text-slate-400">VDI / Web</div>
+              </div>
+              <div class="flex flex-col items-center gap-2">
+                <div class="rounded-xl bg-black/30 p-3 ring-1 ring-white/10 w-36 h-24">
+                  <i data-lucide="smartphone" class="h-6 w-6 text-slate-300"></i>
+                  <div id="flowDevC" class="mt-2 grid grid-cols-6 gap-1.5" aria-hidden="true"></div>
+                </div>
+                <div class="text-xs text-slate-400">Mobile</div>
+              </div>
+            </div>
+
+            <div class="mt-6">
+              <div class="mx-auto max-w-md rounded-2xl border border-white/10 bg-black/20 p-4">
+                <div class="flex items-center gap-3">
+                  <div class="relative">
+                    <div class="h-10 w-10 rounded-full bg-gradient-to-br from-sky-500 to-indigo-500 grid place-items-center font-semibold">U</div>
+                    <div class="absolute left-1/2 top-10 -ml-0.5 user-line h-20 w-1 bg-gradient-to-b from-amber-300 via-white to-amber-300" style="--d: 1.9s"></div>
+                  </div>
+                  <div class="text-sm">
+                    <div class="font-medium text-slate-200">End user</div>
+                    <div class="text-slate-400">Apps on demand — no waiting, no tickets.</div>
+                  </div>
+                </div>
+
+                <div class="mt-6 grid grid-cols-6 gap-2">
+                  <div class="col-span-6 user-beam bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400" style="--d: 2.2s" aria-hidden="true"></div>
+                  <div class="col-span-6 relative rounded-xl border border-white/10 bg-[#0b1328] p-6">
+                    <i data-lucide="laptop" class="h-7 w-7 opacity-80"></i>
+                    <div class="absolute right-4 top-4 badge bg-green-500 text-black grid place-items-center font-bold" style="--d: 2.5s">✓</div>
+                    <div class="mt-1 text-xs text-slate-400">Workspace launches the correct app instantly</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="flowSuccess" class="mt-4 hidden text-emerald-300 text-sm inline-flex items-center gap-1"><i data-lucide="check-circle-2" class="h-4 w-4"></i><span>Configured once, delivered everywhere — faster updates, smaller risk windows.</span></div>
+          </div>
+        </div>
       `;
     }
 
     function renderROI(){
       const i = STATE.roiInputs;
-      const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
       const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
-      const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours;
+      const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
       const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
       const dollarSavedYear = dollarSavedMonth * 12;
       const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
       const roiPct = i.recastAnnualCost ? (netBenefitYear / i.recastAnnualCost) * 100 : 0;
-      const fteHoursYear = 2080;
-      const fteEquivalent = (totalHoursSavedMonth * 12) / fteHoursYear;
 
       return `
         <section role="tabpanel" id="panel-roi" aria-labelledby="tab-roi" class="space-y-6">
@@ -299,52 +503,16 @@
             <div class="text-sm font-medium">Application Workspace pays for itself in weeks, not years.</div>
           </div>
 
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            ${kpi('timer','Hours saved / mo', round(totalHoursSavedMonth), 'Per-user minutes × users + packaging')}
-            ${kpi('line-chart','$ saved / yr', `$${num(dollarSavedYear)}`, 'Illustrative only')}
-            ${kpi('percent','ROI', `${round(roiPct)}%`, 'Net of subscription')}
-            ${kpi('rocket','Tickets / mo', num(ticketsMonth), 'Scale context')}
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            ${kpi('timer','Hours saved / mo', round(totalHoursSavedMonth))}
+            ${kpi('line-chart','$ saved / yr', `$${num(dollarSavedYear)}`)}
+            ${kpi('percent','ROI', `${round(roiPct)}%`)}
           </div>
-
-          <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-5 lg:col-span-2">
-              <h3 class="text-lg font-semibold">Assumptions (edit)</h3>
-              <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                ${numInput('# users','users', i.users)}
-                ${numInput('Tickets per user / mo','ticketsPerUserPerMonth', i.ticketsPerUserPerMonth)}
-                ${numInput('Avg handle (mins)','avgHandleMins', i.avgHandleMins)}
-                ${numInput('Loaded cost ($/hr)','loadedCostPerHour', i.loadedCostPerHour)}
-                ${numInput('Recast annual cost ($)','recastAnnualCost', i.recastAnnualCost)}
-              </div>
-              <div class="mt-4 text-xs text-slate-400">All values are examples. Replace with your data for accurate estimates.</div>
-            </div>
-
-            <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-5">
-              <h3 class="text-lg font-semibold">Results</h3>
-              <div class="mt-3 space-y-2 text-sm">
-                ${kv('Hours saved / month', round(totalHoursSavedMonth))}
-                ${kv('$ saved / month', `$${num(dollarSavedMonth)}`)}
-                ${kv('$ saved / year', `$${num(dollarSavedYear)}`)}
-                ${kv('Net benefit / year', `$${num(netBenefitYear)}`)}
-                ${kv('ROI', `${round(roiPct)}%`)}
-                ${kv('Equivalent IT FTEs freed', round(fteEquivalent))}
-              </div>
-              <div class="mt-2 text-xs text-slate-400 italic">Add a short customer proof-point here for credibility (e.g., “Cut packaging time by 80% in first 30 days”).</div>
-              <div class="mt-4 flex flex-wrap gap-2">
-                <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-white/20 focus-ring">Reset</button>
-                <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:brightness-95 focus-ring">
-                  <i data-lucide="clipboard" class="w-4 h-4" aria-hidden="true"></i> ${STATE.copied ? 'Copied!' : 'Copy executive one-pager'}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <p class="text-xs text-slate-400">Transparency: Recast AW complements device management (e.g., Intune). Windows/macOS focus. Metrics are illustrative; actuals vary.</p>
         </section>
       `;
     }
 
-    function kpi(icon,label,value,hint){
+    function kpi(icon,label,value){
       return `
         <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
           <div class="flex items-center justify-between">
@@ -354,25 +522,6 @@
             </div>
             <i data-lucide="${icon}" class="w-5 h-5 text-sky-300" aria-hidden="true"></i>
           </div>
-          ${hint ? `<div class="mt-1 text-xs text-slate-400">${hint}</div>` : ''}
-        </div>
-      `;
-    }
-
-    function numInput(label, key, value){
-      return `
-        <label class="flex flex-col gap-1">
-          <span class="text-xs text-slate-300">${label}</span>
-          <input class="rounded-xl border border-white/10 bg-[#0b1328] px-3 py-2 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}">
-        </label>
-      `;
-    }
-
-    function kv(label, value){
-      return `
-        <div class="flex items-center justify-between rounded-lg bg-black/20 px-3 py-2">
-          <span class="text-slate-300">${label}</span>
-          <span class="font-semibold">${value}</span>
         </div>
       `;
     }
@@ -384,17 +533,6 @@
         btn.addEventListener('click', (e)=>{
           const next = e.currentTarget.getAttribute('data-tab');
           STATE.activeTab = next;
-          track('scene_viewed', { scene: next });
-          render();
-        });
-      });
-
-      root.querySelectorAll('[data-action="advance"]').forEach(btn=>{
-        btn.addEventListener('click', (e)=>{
-          const next = e.currentTarget.getAttribute('data-next');
-          STATE.activeTab = next;
-          track('toggle_changed', { control: 'tab', value: next });
-          track('scene_viewed', { scene: next });
           render();
         });
       });
@@ -402,7 +540,6 @@
       root.querySelectorAll('[data-action="set-device"]').forEach(btn=>{
         btn.addEventListener('click', e=>{
           STATE.ctx.device = e.currentTarget.getAttribute('data-value');
-          track('toggle_changed', { control: 'device', value: STATE.ctx.device });
           render();
         });
       });
@@ -410,7 +547,6 @@
       root.querySelectorAll('[data-action="set-network"]').forEach(btn=>{
         btn.addEventListener('click', e=>{
           STATE.ctx.network = e.currentTarget.getAttribute('data-value');
-          track('toggle_changed', { control: 'network', value: STATE.ctx.network });
           render();
         });
       });
@@ -418,28 +554,18 @@
       root.querySelectorAll('[data-action="toggle-compliance"]').forEach(btn=>{
         btn.addEventListener('click', ()=>{
           STATE.ctx.compliant = !STATE.ctx.compliant;
-          track('toggle_changed', { control: 'compliant', value: STATE.ctx.compliant });
           render();
         });
       });
 
       const pack = root.querySelector('[data-action="set-pack-hrs"]');
-      if (pack) pack.addEventListener('input', (e)=>{
-        const v = Number(String(e.target.value).replace(/[^0-9.\-]/g,''));
-        STATE.packHrs = isFinite(v) ? v : 0;
-      });
+      if (pack) pack.addEventListener('input', (e)=>{ STATE.packHrs = cleanNum(e.target.value); });
 
       const cfg = root.querySelector('[data-action="set-config-hrs"]');
-      if (cfg) cfg.addEventListener('input', (e)=>{
-        const v = Number(String(e.target.value).replace(/[^0-9.\-]/g,''));
-        STATE.configHrs = isFinite(v) ? v : 0;
-      });
+      if (cfg) cfg.addEventListener('input', (e)=>{ STATE.configHrs = cleanNum(e.target.value); });
 
       const cur = root.querySelector('[data-action="set-current-hrs"]');
-      if (cur) cur.addEventListener('input', (e)=>{
-        const v = Number(String(e.target.value).replace(/[^0-9.\-]/g,''));
-        STATE.currentHrs = isFinite(v) ? v : 0;
-      });
+      if (cur) cur.addEventListener('input', (e)=>{ STATE.currentHrs = cleanNum(e.target.value); });
 
       root.querySelectorAll('[data-action="add-impact"]').forEach(btn=>{
         btn.addEventListener('click', (e)=>{
@@ -448,100 +574,76 @@
           if (kind === 'minutes') STATE.impact.minutes = Number(STATE.impact.minutes) + val;
           if (kind === 'pkgHours') STATE.impact.pkgHours = Number(STATE.impact.pkgHours) + val;
           if (kind === 'riskHrs') STATE.impact.riskHrs = Number(STATE.impact.riskHrs) + val;
-          track('toggle_changed', { control: `impact_${kind}`, value: val });
           render();
         });
       });
 
-      root.querySelectorAll('[data-action="set-roi"]').forEach(inp=>{
-        inp.addEventListener('input', (e)=>{
-          const key = e.currentTarget.getAttribute('data-key');
-          const v = Number(String(e.target.value).replace(/[^0-9.\-]/g,''));
-          STATE.roiInputs[key] = isFinite(v) ? v : 0;
-        });
-      });
-
-      const resetBtn = root.querySelector('[data-action="reset-calculator"]');
-      if (resetBtn) resetBtn.addEventListener('click', ()=>{
-        STATE.roiInputs = {
-          users: 5000,
-          ticketsPerUserPerMonth: 0.035,
-          avgHandleMins: 18,
-          loadedCostPerHour: 85,
-          recastAnnualCost: 120000
-        };
-        STATE.impact = { ...STATE.defaults.impact };
-        track('cta_clicked', { cta: 'reset_calculator' });
-        render();
-      });
-
-      const copyBtn = root.querySelector('[data-action="copy-onepager"]');
-      if (copyBtn) copyBtn.addEventListener('click', async ()=>{
-        const i = STATE.roiInputs;
-        const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
-        const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
-        const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours;
-        const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
-        const dollarSavedYear = dollarSavedMonth * 12;
-        const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
-        const roiPct = i.recastAnnualCost ? (netBenefitYear / i.recastAnnualCost) * 100 : 0;
-        const fteHoursYear = 2080;
-        const fteEquivalent = (totalHoursSavedMonth * 12) / fteHoursYear;
-
-        const body =
-`Recast Application Workspace — Executive One-Pager (Per-User Model)
-
-Assumptions
- - Users: ${i.users}
- - Tickets per user / month: ${i.ticketsPerUserPerMonth}
- - Avg handle: ${i.avgHandleMins} mins
- - Loaded cost: $${i.loadedCostPerHour}/hr
- - Subscription (annual): $${i.recastAnnualCost}
-
-Observed demo impact (illustrative)
- - Minutes saved per user (monthly): ${STATE.impact.minutes}
- - Packaging hours avoided (org): ${STATE.impact.pkgHours}
- - Zero-day window reduced (hrs): ${STATE.impact.riskHrs}
-
-Calculated outcomes
- - Tickets / month: ${num(ticketsMonth)}
- - Hours saved / month: ${round(totalHoursSavedMonth)}
- - $ saved / month: $${num(dollarSavedMonth)}
- - $ saved / year: $${num(dollarSavedYear)}
- - Net benefit / year: $${num(netBenefitYear)}
- - ROI: ${round(roiPct)}%
- - Equivalent IT FTEs freed: ${round(fteEquivalent)}
-
-Notes: All values are examples; replace with your data for accurate estimates.`;
-        try {
-          await navigator.clipboard.writeText(body);
-        } catch {
-          const ta = document.createElement('textarea');
-          ta.value = body;
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-        }
-        STATE.copied = true;
-        track('cta_clicked', { cta: 'copy_onepager' });
-        render();
-        setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
-      });
+      const startBtn = root.querySelector('[data-action="start-flow"]');
+      if (startBtn) startBtn.addEventListener('click', startFlow);
     }
 
-    (function injectAnimations(){
-      const style = document.createElement('style');
-      style.textContent = `
-        @keyframes fadeInUp { from { opacity:.0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
-      `;
-      document.head.appendChild(style);
-    })();
+    function cleanNum(v){ v = Number(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(v) ? v : 0; }
 
-    document.addEventListener('DOMContentLoaded', ()=>{
-      track('scene_viewed', { scene: STATE.activeTab });
-      render();
-    });
+    /* Build the catalog + pulse dots */
+    function buildFlow(){
+      // Populate realistic catalog
+      let baseDelay = 0;
+      CATALOG.forEach(section=>{
+        const mount = document.getElementById(section.id);
+        if(!mount) return;
+        mount.innerHTML = '';
+        section.items.forEach((itm, idx)=>{
+          const tile = document.createElement('div');
+          tile.className = 'logo-tile text-center';
+          tile.style.setProperty('--d',(baseDelay + idx*0.06).toFixed(2)+'s');
+          tile.title = itm.name;
+          tile.innerHTML = `
+            <div class="logo-ring">${itm.svg}</div>
+            <div class="mt-1 app-label text-slate-300 truncate">${itm.name}</div>
+          `;
+          mount.appendChild(tile);
+        });
+        baseDelay += 0.3;
+      });
+
+      // Pulse through the flow
+      buildTiles(document.getElementById('flowConnA'), 20, .5);
+      buildTiles(document.getElementById('flowConnB'), 20, .55);
+      buildTiles(document.getElementById('flowConnC'), 20, .6);
+      buildTiles(document.getElementById('flowGrpA'), 24, 1.0);
+      buildTiles(document.getElementById('flowGrpB'), 24, 1.05);
+      buildTiles(document.getElementById('flowGrpC'), 24, 1.1);
+      buildTiles(document.getElementById('flowDevA'), 12, 1.6);
+      buildTiles(document.getElementById('flowDevB'), 12, 1.7);
+      buildTiles(document.getElementById('flowDevC'), 12, 1.8);
+    }
+
+    function buildTiles(container, count, baseDelay){
+      if(!container) return;
+      container.innerHTML='';
+      for(let i=0;i<count;i++){
+        const d=document.createElement('div');
+        d.className='tile';
+        d.style.setProperty('--d', (baseDelay + i*0.04).toFixed(2)+'s');
+        container.appendChild(d);
+      }
+    }
+
+    function startFlow(){
+      const card = document.getElementById('flowCard');
+      if(!card) return;
+      card.classList.remove('run'); void card.offsetWidth;
+      card.classList.add('run');
+      const flash = document.getElementById('flowHubFlash');
+      const success = document.getElementById('flowSuccess');
+      if(flash) flash.classList.remove('hidden');
+      if(success) success.classList.add('hidden');
+      setTimeout(()=> flash && flash.classList.add('hidden'), 1200);
+      setTimeout(()=> success && success.classList.remove('hidden'), 2600);
+      setTimeout(()=>{ card.classList.remove('run'); success && success.classList.add('hidden'); }, 7000);
+    }
+
+    document.addEventListener('DOMContentLoaded', render);
   </script>
 </body>
 </html>
