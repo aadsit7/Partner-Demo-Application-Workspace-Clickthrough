@@ -110,11 +110,12 @@
         </header>
 
         <main class="mx-auto max-w-6xl px-4 pb-16">
+          ${STATE.activeTab!=='problems' ? `
           <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             ${chip('Minutes saved (per user)', String(STATE.impact.minutes), 'emerald')}
             ${chip('Packaging hours avoided', String(STATE.impact.pkgHours), 'sky')}
             ${chip('Zero-day window reduced (hrs)', String(round(STATE.impact.riskHrs)), 'yellow')}
-          </div>
+          </div>` : ''}
           <section class="mt-5">${renderActivePanel()}</section>
         </main>
       `;
@@ -662,7 +663,7 @@ Notes: Illustrative; replace with your data.`;
       const avatar=document.getElementById('endUserAvatar');
       const badge=document.getElementById('endUserBadge');
       if(avatar){ avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); avatar.textContent='U'; }
-      if(badge){ badge.textContent='!'; badge.classList.remove('bg-green-500'); badge.classList.add('bg-rose-500'); }
+      if(badge){ badge.textContent='!'; badge.classList.remove('bg-rose-500'); badge.classList.add('bg-rose-500'); }
     }
     function buildTiles(container,count,baseDelay){
       if(!container) return; container.innerHTML='';
