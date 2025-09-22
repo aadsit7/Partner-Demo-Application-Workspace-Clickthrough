@@ -144,7 +144,7 @@
       return '';
     }
 
-    /* ---------- Tab 1: Current State (copy exactly mirrors screenshot) ---------- */
+    /* ---------- Tab 1: Current State ---------- */
     function renderProblems(){
       const items=[
         {t:'Fragmented delivery',s:'Windows / Mac / VDI / Web — users guess the right way.',i:'layers'},
@@ -359,7 +359,7 @@
       `;
     }
 
-    /* ---------- Tab 3: Impact & ROI (unchanged experience; live-updating) ---------- */
+    /* ---------- Tab 3: Impact & ROI ---------- */
     function renderROI(){
       const r = calcROI();
       return `
@@ -399,13 +399,8 @@
               <div class="mt-4 flex flex-wrap gap-2">
                 <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20 focus-ring">Reset</button>
                 <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:brightness-95 focus-ring">
-                  <i data-lucide="clipboard" class="w-4 h-4"></i> ${STATE.copied ? 'Copied!' : 'Copy'}
+                  <i data-lucide="clipboard" class="w-4 h-4"></i> ${STATE.copied ? 'Copied!' : 'Copy executive one-pager'}
                 </button>
-              </div>
-
-              <div class="mt-4">
-                <h4 class="text-sm font-semibold">Business Justification Summary (copy-ready)</h4>
-                <pre id="onepagerBlock" class="mt-2 whitespace-pre-wrap rounded-lg border border-white/10 bg-black/20 p-3 text-sm leading-relaxed" aria-live="polite"></pre>
               </div>
             </div>
           </div>
@@ -451,21 +446,8 @@
       setText('res-net', '$'+num(r.netBenefitYear));
       setText('res-roi', r.roiPct+'%');
       setText('res-fte', r.fteEquivalent);
-      updateExecutiveBlock(r);
     }
     function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent = String(value); }
-
-    function updateExecutiveBlock(r){
-      const el=document.getElementById('onepagerBlock');
-      if(!el) return;
-      el.textContent = onePagerTemplate()
-        .replace('[HoursSavedPerMonth]', String(r.totalHoursSavedMonth))
-        .replace('[ITFTEsFreed]', String(r.fteEquivalent))
-        .replace('[MonthlySavings]', num(r.dollarSavedMonth))
-        .replace('[AnnualSavings]', num(r.dollarSavedYear))
-        .replace('[NetBenefit]', num(r.netBenefitYear))
-        .replace('[ROI]', String(r.roiPct));
-    }
 
     function onePagerTemplate(){
       return `Business Justification Summary
@@ -627,9 +609,14 @@ In short, the market trend is clear: organizations that modernize app delivery a
 
       const copyBtn=root.querySelector('[data-action="copy-onepager"]');
       if(copyBtn) copyBtn.addEventListener('click', async ()=>{
-        const block=document.getElementById('onepagerBlock');
-        if(!block) return;
-        const text=block.innerText;
+        const r = calcROI();
+        const text = onePagerTemplate()
+          .replace('[HoursSavedPerMonth]', String(r.totalHoursSavedMonth))
+          .replace('[ITFTEsFreed]', String(r.fteEquivalent))
+          .replace('[MonthlySavings]', num(r.dollarSavedMonth))
+          .replace('[AnnualSavings]', num(r.dollarSavedYear))
+          .replace('[NetBenefit]', num(r.netBenefitYear))
+          .replace('[ROI]', String(r.roiPct));
         try { await navigator.clipboard.writeText(text); } catch {
           const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
         }
@@ -650,9 +637,8 @@ In short, the market trend is clear: organizations that modernize app delivery a
         section.items.forEach((itm,idx)=>{
           const wrap=document.createElement('div'); wrap.className='logo-wrap'; wrap.style.setProperty('--d',(base+idx*0.06).toFixed(2)+'s');
           const ring=document.createElement('div'); ring.className='logo-ring'; ring.innerHTML=itm.svg; ring.title=itm.name; ring.setAttribute('role','img'); ring.setAttribute('aria-label',itm.name);
-          wrap.appendChild(ring);
-          if(STATE.showLabels){ const label=document.createElement('span'); label.className='logo-name'; label.textContent=itm.name; wrap.appendChild(label); }
           mount.appendChild(wrap);
+          if(STATE.showLabels){ const label=document.createElement('span'); label.className='logo-name'; label.textContent=itm.name; wrap.appendChild(label); }
         });
         base+=0.25;
       });
