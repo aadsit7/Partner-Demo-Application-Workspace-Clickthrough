@@ -396,12 +396,16 @@
                 ${kvId('ROI', r.roiPct+'%', 'res-roi')}
                 ${kvId('Equivalent IT FTEs freed', r.fteEquivalent, 'res-fte')}
               </div>
-              <div class="mt-2 text-[11px] text-slate-400 italic">Add a short customer proof-point here (e.g., “Cut packaging time by 80% in first 30 days”).</div>
               <div class="mt-4 flex flex-wrap gap-2">
                 <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20 focus-ring">Reset</button>
                 <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:brightness-95 focus-ring">
-                  <i data-lucide="clipboard" class="w-4 h-4"></i> ${STATE.copied ? 'Copied!' : 'Copy executive one-pager'}
+                  <i data-lucide="clipboard" class="w-4 h-4"></i> ${STATE.copied ? 'Copied!' : 'Copy'}
                 </button>
+              </div>
+
+              <div class="mt-4">
+                <h4 class="text-sm font-semibold">Business Justification Summary (copy-ready)</h4>
+                <pre id="onepagerBlock" class="mt-2 whitespace-pre-wrap rounded-lg border border-white/10 bg-black/20 p-3 text-sm leading-relaxed" aria-live="polite"></pre>
               </div>
             </div>
           </div>
@@ -447,8 +451,44 @@
       setText('res-net', '$'+num(r.netBenefitYear));
       setText('res-roi', r.roiPct+'%');
       setText('res-fte', r.fteEquivalent);
+      updateExecutiveBlock(r);
     }
     function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent = String(value); }
+
+    function updateExecutiveBlock(r){
+      const el=document.getElementById('onepagerBlock');
+      if(!el) return;
+      el.textContent = onePagerTemplate()
+        .replace('[HoursSavedPerMonth]', String(r.totalHoursSavedMonth))
+        .replace('[ITFTEsFreed]', String(r.fteEquivalent))
+        .replace('[MonthlySavings]', num(r.dollarSavedMonth))
+        .replace('[AnnualSavings]', num(r.dollarSavedYear))
+        .replace('[NetBenefit]', num(r.netBenefitYear))
+        .replace('[ROI]', String(r.roiPct));
+    }
+
+    function onePagerTemplate(){
+      return `Business Justification Summary
+
+Why Change:
+Across the market, IT teams are struggling with slow, manual app delivery and patching. Every delay drains valuable IT resources and leaves organizations exposed to unnecessary risk. Legacy tools make it difficult to keep up with constant updates, new app versions, and growing compliance requirements.
+
+Why Now:
+Application updates and security patches never stop. Regulations are tightening, insurers are demanding proof of fast patching, and many legacy platforms are reaching end-of-life. Delays increase both operational cost and security exposure, making speed and consistency more critical than ever.
+
+Why Recast:
+Organizations adopting Recast Software are able to deliver apps faster with one workspace across all devices. Instead of rebuilding packages repeatedly, IT can configure once, deploy anywhere, and patch automatically. Zero-day vulnerabilities that previously took days to resolve are now closed in hours, reducing risk while freeing IT teams to focus on higher-value projects.
+
+Business Impact (Your Estimates):
+• Hours saved per month: [HoursSavedPerMonth]
+• Equivalent IT FTEs freed: [ITFTEsFreed]
+• Monthly savings: $[MonthlySavings]
+• Annual savings: $[AnnualSavings]
+• Net annual benefit: $[NetBenefit]
+• ROI: [ROI]%
+
+In short, the market trend is clear: organizations that modernize app delivery and patching with Recast reduce risk, gain agility, and unlock measurable financial returns that far outweigh the investment.`;
+    }
 
     function kpiId(icon,label,value,hint,id){
       return `
@@ -586,44 +626,12 @@
       });
 
       const copyBtn=root.querySelector('[data-action="copy-onepager"]');
-      ifcopy: if(copyBtn) copyBtn.addEventListener('click', async ()=>{
-        const i = STATE.roiInputs;
-        const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
-        const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
-        const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
-        const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
-        const dollarSavedYear = dollarSavedMonth * 12;
-        const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
-        const roiPct = i.recastAnnualCost ? (netBenefitYear / i.recastAnnualCost) * 100 : 0;
-        const fteHoursYear = 2080;
-        const fteEquivalent = (totalHoursSavedMonth * 12) / fteHoursYear;
-        const body =
-`Recast Application Workspace — Executive One-Pager
-
-Assumptions
- - Users: ${i.users}
- - Tickets per user / month: ${i.ticketsPerUserPerMonth}
- - Avg handle: ${i.avgHandleMins} mins
- - Loaded cost: $${i.loadedCostPerHour}/hr
- - Subscription (annual): $${i.recastAnnualCost}
-
-Observed demo impact (illustrative)
- - Minutes saved per user (monthly): ${STATE.impact.minutes}
- - Packaging hours avoided (org): ${STATE.impact.pkgHours}
- - Zero-day window reduced (hrs): ${STATE.impact.riskHrs}
-
-Calculated outcomes
- - Tickets / month: ${num(ticketsMonth)}
- - Hours saved / month: ${round(totalHoursSavedMonth)}
- - $ saved / month: $${num(dollarSavedMonth)}
- - $ saved / year: $${num(dollarSavedYear)}
- - Net benefit / year: $${num(netBenefitYear)}
- - ROI: ${round(roiPct)}%
- - Equivalent IT FTEs freed: ${round(fteEquivalent)}
-
-Notes: Illustrative; replace with your data.`;
-        try { await navigator.clipboard.writeText(body); } catch {
-          const ta=document.createElement('textarea'); ta.value=body; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      if(copyBtn) copyBtn.addEventListener('click', async ()=>{
+        const block=document.getElementById('onepagerBlock');
+        if(!block) return;
+        const text=block.innerText;
+        try { await navigator.clipboard.writeText(text); } catch {
+          const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
         }
         STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
       });
