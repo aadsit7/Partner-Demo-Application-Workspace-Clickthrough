@@ -219,8 +219,8 @@
     function cardOneIcon(route){
       return `
         <div class="section-card p-4">
-          <div class="flex items-center gap-2"><span>🖥️</span><h3 class="text-base font-semibold">One App, Always the Right Version</h3></div>
-          <p class="mt-1 text-sm text-slate-300">Users click once. Workspace routes to Windows, macOS, Web, VPN, or VDI automatically.</p>
+          <div class="flex items-center gap-2"><span>🖥️</span><h3 class="text-base font-semibold">Always the Right App, No Matter Where You Work.</h3></div>
+          <p class="mt-1 text-sm text-slate-300">Smart Icons open apps the best way for each user—on Windows, macOS, Web, VPN, or VDI.</p>
           <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
             ${['Windows','Mac'].map(d=>pill(d,STATE.ctx.device===d,'set-device',d)).join('')}
             ${['Corporate','VPN'].map(n=>pill(n,STATE.ctx.network===n,'set-network',n)).join('')}
