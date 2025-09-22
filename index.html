@@ -112,7 +112,7 @@
         <main class="mx-auto max-w-6xl px-4 pb-16">
           ${STATE.activeTab!=='problems' ? `
           <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            ${chip('Minutes saved (per user)', String(STATE.impact.minutes), 'emerald')}
+            ${chip('Minutes saved (per user/per month)', String(STATE.impact.minutes), 'emerald')}
             ${chip('Packaging hours avoided', String(STATE.impact.pkgHours), 'sky')}
             ${chip('Zero-day window reduced (hrs)', String(round(STATE.impact.riskHrs)), 'yellow')}
           </div>` : ''}
