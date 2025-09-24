@@ -5,91 +5,20 @@
   <title>Recast — Compact Click-Through (Realistic Catalog)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"></noscript>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    window.tailwind || (window.__cdnWarn = true);
+  </script>
   <link rel="preconnect" href="https://unpkg.com">
   <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    .focus-ring:focus-visible{outline:2px solid #0471FB;outline-offset:2px}
-    html,body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji"}
-    .section-card{border-radius:1rem;border:1px solid rgba(255,255,255,.10);background:#16215D}
-    .sub-card{border-radius:.75rem;border:1px solid rgba(255,255,255,.12);background:#1A2A7A}
-
-    /* Flow primitives */
-    .tile{width:.45rem;height:.45rem;border-radius:.25rem;background:#1F289B;opacity:.9}
-    .run .tile{animation:tilePulse 1s ease-in-out var(--d,0s) 1 forwards}
-    @keyframes tilePulse{0%{transform:scale(.7);background:#1F289B;opacity:.6}50%{transform:scale(1.05);background:#30D1FE;opacity:1}100%{background:#1F289B;opacity:.9}}
-    .flow-bar{height:.22rem;border-radius:.25rem;transform-origin:left center;transform:scaleX(0)}
-    .run .flow-bar{animation:barGrow .9s ease forwards var(--d,0s)}
-    @keyframes barGrow{to{transform:scaleX(1)}}
-    .bolt-line{width:.22rem;border-radius:.25rem;transform-origin:top center;transform:scaleY(0)}
-    .run .bolt-line{animation:boltDrop .9s ease forwards var(--d,0s)}
-    @keyframes boltDrop{to{transform:scaleY(1)}}
-
-    /* Catalog logos */
-    .logo-ring{width:2.1rem;height:2.1rem;border-radius:9999px;display:grid;place-items:center;background:#0a1226;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
-    .logo-wrap{display:flex;align-items:center;gap:.4rem}
-    .logo-name{font-size:.7rem;color:#cbd5e1;white-space:nowrap}
-    .run .logo-ring{animation:appPop .85s cubic-bezier(.2,.8,.2,1) var(--d,0s) 1 forwards}
-    @keyframes appPop{0%{transform:scale(.85);filter:saturate(.4);opacity:.6}65%{transform:scale(1.05);filter:saturate(1);opacity:1}100%{transform:scale(1)}}
-
-    /* End user */
-    .user-beam{height:.38rem;border-radius:.38rem;transform-origin:left center;transform:scaleX(0)}
-    .run .user-beam{animation:barGrow 1s ease forwards var(--d,0s)}
-    .badge{width:1.15rem;height:1.15rem;border-radius:.3rem;opacity:0;transform:translateY(-6px) scale(.9)}
-    .run .badge{animation:badgeDrop .8s ease-out var(--d,0s) forwards}
-    @keyframes badgeDrop{to{opacity:1;transform:translateY(0) scale(1)}}
-
-    /* Catalog rows */
-    .cat-row{display:grid;grid-template-columns:15ch 1fr;gap:.5rem;align-items:center}
-
-    /* Text gradient helpers */
-    .bg-clip-text{ -webkit-background-clip:text; background-clip:text }
-
-    /* Brand buttons */
-    button[data-action="advance"],
-    button[data-action="copy-onepager"],
-    button[data-action="add-impact"],
-    button[data-action="reset-calculator"]{
-      background:#0471FB;
-      color:#ffffff;
-      border-radius:9999px;
-      transition:filter .2s ease, transform .02s ease;
-    }
-    button[data-action="add-impact"]{ background:#0370FE; }
-    button[data-action="advance"]:hover,
-    button[data-action="copy-onepager"]:hover,
-    button[data-action="add-impact"]:hover,
-    button[data-action="reset-calculator"]:hover{ filter:brightness(1.05); }
-    button[data-action="advance"]:active,
-    button[data-action="copy-onepager"]:active,
-    button[data-action="add-impact"]:active,
-    button[data-action="reset-calculator"]:active{ transform:translateY(1px); }
-    /* Secondary pills */
-    button[data-action="set-device"],
-    button[data-action="set-network"],
-    button[data-action="toggle-compliance"]{
-      background:#16215D;
-      color:#E4EAF7;
-      border:1px solid rgba(255,255,255,.12);
-    }
-    button[data-action="set-device"][aria-pressed="true"],
-    button[data-action="set-network"][aria-pressed="true"],
-    button[data-action="toggle-compliance"][aria-pressed="true"]{
-      outline:2px solid #30D1FE;
-    }
-    /* Small orange emphasis badges/arrows */
-    .badge, .hint-arrow { background:#EF5927 !important; color:#fff; }
-  </style>
+  <script>
+    window.addEventListener('error', function(){}, { once: true });
+  </script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-[#1F289B] via-[#262CC2] to-[#16215D] text-[#F7F8F9] antialiased">
-  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus-ring rounded bg-black/60 px-3 py-2">Skip to content</a>
-
-  <main id="main" class="mx-auto max-w-6xl px-4 py-6">
-    <div id="app"></div>
-  </main>
+<body class="min-h-screen bg-[#0b1020] text-slate-100 antialiased" style="font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji">
+  <div id="app" class="min-h-screen"></div>
 
   <script>
     const STATE = {
@@ -100,7 +29,8 @@
       packHrs: 8, configHrs: 2, currentHrs: 24,
       roiInputs: { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 },
       copied: false,
-      showLabels: false
+      showLabels: false,
+      cdnIssues: !!window.__cdnWarn
     };
 
     const TABS = [
@@ -109,48 +39,59 @@
       { id: 'roi', label: 'Impact & ROI', icon: 'bar-chart-3' }
     ];
 
-    /* ---------- Utils ---------- */
+    const CATALOG = [
+      { id: 'row-sec', title: 'Security', apps: ['Defender', 'Chrome', 'Firefox', 'Zoom'] },
+      { id: 'row-prod', title: 'Productivity', apps: ['Office', 'Teams', 'Notepad++', 'Slack'] },
+      { id: 'row-eng', title: 'Engineering', apps: ['VS Code', 'Git', 'Node', 'Python'] },
+      { id: 'row-line', title: 'Line-of-Business', apps: ['ERP', 'CRM', 'HR Suite'] }
+    ];
+
     function cx(...a){ return a.filter(Boolean).join(' '); }
     function round(n){ return Math.round(n*100)/100; }
     function num(n){ return new Intl.NumberFormat().format(Math.round(n)); }
+    function cleanNum(v){ v = Number(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(v) ? v : 0; }
+    function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
     function routeRecommendation(ctx){
       if(!ctx.compliant) return 'Web';
       if(ctx.device==='Windows' && ctx.network!=='Home') return 'Local';
       return 'VDI';
     }
-    function cleanNum(v){ v = Number(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(v) ? v : 0; }
 
-    /* ---------- Root render ---------- */
     function render(){
       const root=document.getElementById('app');
       root.innerHTML = `
+        <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:rounded focus:bg-yellow-300 focus:px-3 focus:py-1 focus:text-slate-900">Skip to content</a>
+
+        ${STATE.cdnIssues ? `
+          <div role="alert" class="bg-amber-500 text-slate-900 px-4 py-2 text-sm">
+            Tailwind failed to load from CDN. The page will display unstyled. Check your network or CDN blocking settings.
+          </div>
+        ` : ''}
+
         <header class="relative overflow-hidden">
-          <div aria-hidden="true" class="absolute inset-0"><div aria-hidden="true" class="absolute right-6 top-6 opacity-80">
-  <svg width="88" height="32" viewBox="0 0 88 32" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="forward">
-    <g fill="none" stroke="#EF5927" stroke-width="2" stroke-linecap="round" stroke-dasharray="0 6">
-      <path d="M4 16 H72"></path>
-      <path d="M72 16 L60 6"></path>
-      <path d="M72 16 L60 26"></path>
-    </g>
-  </svg>
-</div>
-            <div class="absolute -top-40 -left-28 h-[420px] w-[420px] rounded-full blur-3xl bg-gradient-to-br from-[#0471FB]/30 via-[#30D1FE]/25 to-[#262CC2]/35"></div>
-            <div class="absolute -top-16 right-0 h-[280px] w-[280px] rounded-full blur-3xl bg-gradient-to-br from-[#30D1FE]/30 via-[#0471FB]/25 to-[#1F289B]/30"></div>
+          <div aria-hidden="true" class="absolute inset-0">
+            <div class="absolute -top-40 -left-28 h-[420px] w-[420px] blur-[110px] rounded-full bg-gradient-to-br from-sky-500/25 via-indigo-500/20 to-fuchsia-500/30"></div>
+            <div class="absolute -top-16 right-0 h-[280px] w-[280px] blur-[110px] rounded-full bg-gradient-to-br from-fuchsia-400/25 via-purple-500/20 to-sky-500/25"></div>
           </div>
           <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
             <h1 class="text-3xl sm:text-4xl font-extrabold leading-tight">
-              <span aria-label="Recast wordmark" class="inline-flex items-baseline gap-1"><span class="bg-clip-text text-transparent bg-gradient-to-r from-[#1F289B] via-[#0471FB] to-[#30D1FE]">Re</span><span class="text-white">cast</span></span>
+              <span class="text-white">Recast Software</span>
             </h1>
             <p class="mt-2 max-w-2xl text-slate-300">
               ${STATE.activeTab==='problems'
                 ? 'Application deployment isn’t the problem. Doing it fast, consistently, and securely across the business is. — Microsoft MVP'
-                : 'Recast works across SCCM, Intune, Citrix, VMware and more—making the tools you already use faster, smarter, and easier to manage'}
+                : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
             </p>
           </div>
           <div class="relative mx-auto max-w-6xl px-4">
-            <div role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded-full bg-[#0f1c5a] p-1 ring-1 ring-white/10">
+            <div role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded-full bg-[#0b152f] p-1 ring-1 ring-white/10">
               ${TABS.map(t=>`
-                <button type="button" class="${cx('inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm focus-ring transition', STATE.activeTab===t.id ? 'bg-white/10 text-white' : 'text-white/80 hover:bg-white/10')}" data-action="switch-tab" data-tab="${t.id}" role="tab" aria-controls="panel-${t.id}" aria-selected="${STATE.activeTab===t.id}">
+                <button type="button"
+                        role="tab"
+                        id="tab-${t.id}"
+                        aria-controls="panel-${t.id}"
+                        class="${cx('inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 transition', STATE.activeTab===t.id ? 'bg-yellow-400 text-slate-900' : 'text-slate-200 hover:bg-white/5')}"
+                        data-action="switch-tab" data-tab="${t.id}" aria-selected="${STATE.activeTab===t.id}">
                   <i data-lucide="${t.icon}" class="w-4 h-4"></i><span>${t.label}</span>
                 </button>
               `).join('')}
@@ -158,20 +99,37 @@
           </div>
         </header>
 
-        <main class="relative mx-auto max-w-6xl px-4 py-6 space-y-6">
-          ${renderActivePanel()}
+        <main id="main" class="mx-auto max-w-6xl px-4 pb-16" tabindex="-1">
+          ${STATE.activeTab!=='problems' ? `
+            <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              ${chip('Minutes saved (per user/per month)', String(STATE.impact.minutes), 'emerald')}
+              ${chip('Packaging hours avoided', String(STATE.impact.pkgHours), 'sky')}
+              ${chip('Zero-day window reduced (hrs)', String(round(STATE.impact.riskHrs)), 'yellow')}
+            </div>` : ''
+          }
+          <section class="mt-5" aria-live="polite">${renderActivePanel()}</section>
         </main>
+
+        <footer class="border-t border-white/10">
+          <div class="mx-auto max-w-6xl px-4 py-6 text-sm text-slate-400 flex items-center justify-between">
+            <span class="inline-flex items-center gap-1"><i data-lucide="badge-check" class="w-4 h-4"></i> Demo only — single-file HTML</span>
+            <button type="button" data-action="copy-json" class="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 hover:bg-white/20 text-slate-200 text-sm inline-flex items-center gap-2">
+              <i data-lucide="${STATE.copied ? 'check' : 'clipboard'}" class="w-4 h-4"></i>
+              <span>${STATE.copied ? 'Copied' : 'Copy impact JSON'}</span>
+            </button>
+          </div>
+        </footer>
       `;
-      lucide.createIcons();
+      if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
       attachEvents();
-      // Ensure any animated bits reset
-      resetFlowTiles();
+      if (STATE.activeTab === 'solution') { buildFlow(); }
+      if (STATE.activeTab === 'roi') { updateROIOutputs(); }
     }
 
     function chip(label,value,tone){
-      const tones={emerald:'from-emerald-400/80 to-teal-400/80',sky:'from-sky-300/80 to-cyan-300/80',blue:'from-blue-300/80 to-indigo-400/80',yellow:'from-yellow-300/90 to-amber-400/90'};
+      const tones={emerald:'from-emerald-400/80 to-teal-400/80',sky:'from-sky-400/80 to-indigo-400/80',yellow:'from-yellow-300/90 to-amber-400/90'};
       return `
-        <div class="section-card p-3">
+        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-3">
           <div class="text-[11px] text-slate-300">${label}</div>
           <div class="mt-1 inline-flex items-center gap-2 rounded-full bg-gradient-to-r px-2 py-0.5 text-slate-900 ${tones[tone]}">
             <i data-lucide="badge-check" class="w-4 h-4"></i><span class="text-sm font-semibold">${value}</span>
@@ -187,7 +145,6 @@
       return '';
     }
 
-    /* ---------- Tab 1: Current State (copy exactly mirrors screenshot) ---------- */
     function renderProblems(){
       const items=[
         {t:'Fragmented delivery',s:'Windows / Mac / VDI / Web — users guess the right way.',i:'layers'},
@@ -196,47 +153,52 @@
         {t:'Slow upgrades',s:'Stuck to old images; change is slow.',i:'layout-grid'}
       ];
       return `
-        <section id="panel-problems" class="grid grid-cols-1 gap-3 lg:grid-cols-3">
-          ${items.map((x,idx)=>problemCard(x.t,x.s,x.i,idx===0)).join('')}
-          <div class="section-card p-4 lg:col-span-3">
-            <h3 class="text-base font-semibold">Realistic Catalog (sample)</h3>
-            <div class="mt-3 space-y-3">
-              ${CATALOG.map(({title,id,items})=>catalogRow(title,id,items)).join('')}
-            </div>
+        <section id="panel-problems" role="tabpanel" aria-labelledby="tab-problems" class="space-y-3">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            ${items.map(p=>`
+              <article class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
+                <div class="flex items-center gap-2"><i data-lucide="${p.i}" class="w-5 h-5 text-sky-300"></i><h3 class="text-base font-semibold">${p.t}</h3></div>
+                <p class="mt-1 text-sm text-slate-300">${p.s}</p>
+              </article>
+            `).join('')}
+          </div>
+          <p class="text-sm text-slate-300">Too many apps, too many updates — IT can’t keep up, leaving systems behind and security at risk.</p>
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+            ${callout('alert-triangle','Why change',[
+              'App delivery is siloed and slow.',
+              'Manual work drains scarce IT time and talent.',
+              'Every delay leaves the business more exposed to risk'
+            ])}
+            ${callout('clock-4','Why now',[
+              'Updates never stop — apps and systems change every few weeks.',
+              'Regulators and insurers demand proof of fast patching.',
+              'Legacy platforms are hitting end-of-life — forcing costly upgrades.'
+            ])}
+            ${callout('sparkles','Why Recast',[
+              'Deliver apps faster with one workspace across all devices.',
+              'Configure once, deploy anywhere, patch automatically.',
+              'Zero-day closed in hours, not days.'
+            ],true)}
           </div>
         </section>
       `;
     }
-
-    function problemCard(title,subtitle,icon,cta){
-      const bullets=[
-        'Inconsistent user experience',
-        'Manual handoffs across teams',
-        'Risk windows during patching',
-        'Shadow IT workarounds'
-      ];
+    function callout(icon,label,bullets,cta=false){
       return `
-        <div class="section-card p-4">
-          <div class="flex items-center gap-2">
-            <div class="h-7 w-7 rounded-lg bg-gradient-to-br from-sky-400 via-blue-500 to-cyan-400 grid place-items-center">
-              <i data-lucide="${icon}" class="w-4 h-4 text-white"></i>
-            </div>
-            <h3 class="text-base font-semibold">${title}</h3>
-          </div>
-          <p class="mt-1 text-sm text-slate-300">${subtitle}</p>
-          <ul class="mt-2 list-disc pl-5 text-sm text-slate-300">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>
-          ${cta?`<div class="mt-3 flex justify-end"><button type="button" class="px-4 py-2 text-sm font-semibold text-white focus-ring" data-action="advance" data-next="solution"><i data-lucide="arrow-right" class="w-4 h-4"></i> How Recast solves it</button></div>`:''}
+        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-3">
+          <div class="flex items-center gap-2 text-sm font-semibold"><i data-lucide="${icon}" class="w-4 h-4 text-amber-400"></i><span>${label}</span></div>
+          <ul class="mt-1 list-disc pl-5 text-sm text-slate-300">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>
+          ${cta?`<div class="mt-3 flex justify-end"><button type="button" data-action="advance" data-next="solution" class="rounded-full bg-[#e76a1f] px-3 py-1.5 text-sm font-semibold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 inline-flex items-center gap-2"><i data-lucide="arrow-right" class="w-4 h-4"></i> How Recast solves it</button></div>`:''}
         </div>
       `;
     }
 
-    /* ---------- Tab 2: Recast Approach ---------- */
     function renderSolution(){
-      const saved=Math.max(STATE.packHrs-STATE.configHrs,0);
-      const reduced=Math.max(STATE.currentHrs-2,0);
+      const saved=Math.max(0, Number(STATE.packHrs)-Number(STATE.configHrs));
+      const reduced=Math.max(0, Number(STATE.currentHrs)-1.5);
       const route=routeRecommendation(STATE.ctx);
       return `
-        <section id="panel-solution" class="space-y-3">
+        <section id="panel-solution" role="tabpanel" aria-labelledby="tab-solution" class="space-y-3">
           <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
             ${renderFlow()}
             <div class="flex flex-col gap-3">
@@ -250,13 +212,13 @@
     }
 
     function pill(label,active,action,value){
-      return `<button type="button" class="${cx('rounded-full px-3 py-1 text-xs transition focus-ring', active?'text-white font-semibold':'text-white/80')}" data-action="${action}" data-value="${String(value)}">${label}</button>`;
+      return `<button type="button" class="${cx('rounded-full px-3 py-1 border text-xs transition focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400',active?'bg-yellow-400 text-slate-900 border-transparent':'bg-[#0a1124] text-slate-200 hover:bg-white/10 border-white/10')}" data-action="${action}" data-value="${String(value)}">${label}</button>`;
     }
 
     function cardOneIcon(route){
       return `
-        <div class="section-card p-4">
-          <div class="flex items-center gap-2"><span>🖥️</span><h3 class="text-base font-semibold">Always the Right App, No Matter Where You Work.</h3></div>
+        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
+          <div class="flex items-center gap-2"><span aria-hidden="true">🖥️</span><h3 class="text-base font-semibold">Always the Right App, No Matter Where You Work.</h3></div>
           <p class="mt-1 text-sm text-slate-300">Smart Icons open apps the best way for each user—on Windows, macOS, Web, VPN, or VDI.</p>
           <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
             ${['Windows','Mac'].map(d=>pill(d,STATE.ctx.device===d,'set-device',d)).join('')}
@@ -264,469 +226,433 @@
             ${pill(STATE.ctx.compliant?'Compliant':'Non-compliant',STATE.ctx.compliant,'toggle-compliance','')}
           </div>
           <div class="mt-2 text-sm text-slate-300">Recommended route:</div>
-          <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm"><i data-lucide="check-circle-2" class="w-4 h-4"></i>${route}</div>
-          <div class="mt-3"><button type="button" class="rounded-full px-3 py-1.5 text-sm font-semibold text-white focus-ring" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact (+2 min saved per user)</button></div>
+          <div class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-3 py-1 text-slate-900 text-sm"><i data-lucide="check-circle-2" class="w-4 h-4"></i>${route}</div>
+          <div class="mt-3"><button type="button" class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs hover:bg-white/20" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact (+2 min saved per user)</button></div>
         </div>
       `;
     }
-
     function cardUpdateOnce(saved){
       return `
-        <div class="section-card p-4">
-          <div class="flex items-center gap-2"><span>📦</span><h3 class="text-base font-semibold">Package Once, Reuse Everywhere</h3></div>
-          <p class="mt-1 text-sm text-slate-300">Stop rebuilding per version. Update the config, not the package.</p>
-          <div class="sub-card p-3 text-sm">
-            <div class="flex items-center justify-between rounded-md bg-white/5 px-3 py-2">
-              <div>Packaging hours today</div>
-              <div class="inline-flex items-center gap-2"><span class="text-xl font-semibold">${STATE.packHrs}</span><span class="text-xs text-slate-300">hrs</span></div>
+        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
+          <div class="flex items-center gap-2"><span aria-hidden="true">⚙️</span><h3 class="text-base font-semibold">Update Once, Deploy Everywhere</h3></div>
+          <p class="mt-1 text-sm text-slate-300">Package one time; push to cloud, on-prem, or hybrid with rings.</p>
+          <div class="rounded-xl border border-white/10 bg-[#0a1124] p-3 text-sm">
+            <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-2" class="w-4 h-4"></i> Critical app updates</div>
+            <label class="mt-2 flex items-center gap-2 text-xs">
+              <span class="text-slate-400">Hours/package</span>
+              <input class="w-20 rounded bg-slate-950 px-2 py-1" value="${STATE.packHrs}" inputmode="decimal" data-action="set-pack-hrs" aria-label="Hours per package">
+              <span>→</span>
+              <input class="w-20 rounded bg-slate-950 px-2 py-1" value="${STATE.configHrs}" inputmode="decimal" data-action="set-config-hrs" aria-label="Hours to configure">
+            </label>
+            <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span>${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong>${saved} hrs saved</strong></div>
+            <div class="mt-2 text-[12px] text-slate-300 flex flex-wrap gap-2">
+              <span class="rounded-full bg-black/30 px-2 py-1">☁️ Cloud</span>
+              <span class="rounded-full bg-black/30 px-2 py-1">🖥️ On-Prem</span>
+              <span class="rounded-full bg-black/30 px-2 py-1">🔀 Hybrid</span>
             </div>
-            <div class="mt-2 flex items-center justify-between rounded-md bg-white/5 px-3 py-2">
-              <div>With Recast</div>
-              <div class="inline-flex items-center gap-2"><span class="text-xl font-semibold">${STATE.configHrs}</span><span class="text-xs text-slate-300">hrs</span></div>
-            </div>
-            <div class="mt-2 text-right"><span class="text-sm">Saved</span> <strong>${saved} hrs</strong></div>
-            <button type="button" class="mt-2 rounded-full px-3 py-1.5 text-sm font-semibold text-white focus-ring" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
+            <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
           </div>
         </div>
       `;
     }
     function cardZeroDay(reduced){
       return `
-        <div class="section-card p-4">
-          <div class="flex items-center gap-2"><span>🛡️</span><h3 class="text-base font-semibold">Zero-Day Patches in Hours</h3></div>
+        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
+          <div class="flex items-center gap-2"><span aria-hidden="true">🛡️</span><h3 class="text-base font-semibold">Zero-Day Patches in Hours</h3></div>
           <p class="mt-1 text-sm text-slate-300">Security fixes deploy in 1–2 hours instead of a full day (~90% faster).</p>
-          <div class="sub-card p-3 text-sm">
+          <div class="rounded-xl border border-white/10 bg-[#0a1124] p-3 text-sm">
             <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> Zero-day rollout</div>
             <label class="mt-2 flex items-center gap-2 text-xs">
               <span class="text-slate-400">Current hrs</span>
-              <input class="w-20 rounded bg-slate-950 px-2 py-1" value="${STATE.currentHrs}" inputmode="decimal" data-action="set-current-hrs" aria-label="Current time to deploy (hours)">
+              <input class="w-24 rounded bg-slate-950 px-2 py-1" value="${STATE.currentHrs}" inputmode="decimal" data-action="set-current-hrs" aria-label="Current time to deploy (hours)">
             </label>
-            <div class="mt-2 flex items-center justify-between rounded-md bg-white/5 px-3 py-2"><span>${STATE.currentHrs} → 1.5 hrs</span><strong>${round(reduced)} hrs reduced</strong></div>
-            <button type="button" class="mt-2 rounded-full px-3 py-1.5 text-sm font-semibold text-white focus-ring" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
+            <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span>${STATE.currentHrs} → 1.5 hrs</span><strong>${round(reduced)} hrs reduced</strong></div>
+            <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
           </div>
         </div>
       `;
     }
 
-    /* ---------- Tab 2 left: Animated Flow ---------- */
     function renderFlow(){
       return `
-        <div class="section-card p-4">
+        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
           <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-2">
-              <div class="h-6 w-6 rounded-lg bg-gradient-to-br from-sky-400 via-blue-500 to-cyan-400 grid place-items-center">
-                <i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i>
+              <div class="h-6 w-6 rounded-lg bg-gradient-to-br from-sky-500 via-indigo-500 to-fuchsia-500 grid place-items-center"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
+              <div>
+                <h3 class="text-base font-semibold">Application Workspace</h3>
+                <div class="text-[12px] text-slate-400">Curated & secured catalog</div>
               </div>
-              <h3 class="text-base font-semibold">Unified Packaging & Delivery</h3>
             </div>
-            <button type="button" class="rounded-full px-3 py-1.5 text-xs font-semibold text-white focus-ring" data-action="run-flow"><i data-lucide="play" class="w-3.5 h-3.5"></i> Run</button>
+            <div class="flex items-center gap-2 text-[12px] text-slate-300">
+              <button type="button" class="rounded-full border border-white/15 bg-white/10 px-2.5 py-1" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
+              <button type="button" data-action="start-flow" class="rounded-full bg-white px-2.5 py-1.5 text-[12px] font-semibold text-slate-900">Start</button>
+              <button type="button" data-action="reset-flow" class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1.5 text-[12px]">Reset</button>
+            </div>
           </div>
 
-          <div id="flowCard" class="mt-3 space-y-2">
-            <div class="sub-card p-3">
-              <div class="text-[12px] text-slate-300">Packaging pipeline</div>
-              <div class="mt-2 grid grid-cols-12 gap-1.5">
-                ${Array.from({length:12}).map((_,i)=>`<div class="flow-bar bg-gradient-to-r from-sky-400 via-blue-500 to-cyan-400" style="--d:${.4 + i*.06}s"></div>`).join('')}
-              </div>
+          <div id="flowCard" class="mt-3 rounded-xl border border-white/10 bg-[#0a1124] p-3" role="region" aria-label="Animated flow">
+            <div class="space-y-2">
+              ${CATALOG.map(s=>`
+                <div class="grid" style="grid-template-columns: 15ch 1fr; gap:.5rem; align-items:center">
+                  <div class="uppercase text-[11px] tracking-wider text-slate-400">${s.title}</div>
+                  <div id="${s.id}" class="flex flex-wrap gap-2"></div>
+                </div>
+              `).join('')}
             </div>
 
-            <div class="sub-card p-3">
-              <div class="text-[12px] text-slate-300">Validated apps</div>
-              <div class="mt-2 grid grid-cols-12 gap-1.5">
-                ${Array.from({length:12}).map((_,i)=>`<div class="tile" style="--d:${.7 + i*.04}s"></div>`).join('')}
-              </div>
+            <div id="flowHubFlash" class="mt-2 hidden text-amber-300 text-[12px] inline-flex items-center gap-1"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></div>
+
+            <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
+              ${['Existing Platforms','Staged Rings','Access & Policy'].map((lbl,i)=>`
+                <div class="rounded-xl border border-white/10 bg-[#0a1124] p-2">
+                  <div class="text-[12px] text-slate-300">${lbl}</div>
+                  <div id="flowConn${String.fromCharCode(65+i)}" class="mt-1 grid grid-cols-10 gap-1.5"></div>
+                  <div class="mt-1 h-1 w-full origin-left scale-x-0 rounded bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400 transition-transform duration-700" style="transition-delay:${550 + 120*i}ms" data-flow="bar"></div>
+                </div>
+              `).join('')}
             </div>
 
-            <div class="relative sub-card p-3 overflow-hidden">
-              <div class="text-[12px] text-slate-300">Workspace routing</div>
-              <div class="mt-2 grid grid-cols-3 gap-2" aria-hidden="true">
-                ${['A','B','C'].map((k,i)=>`
-                  <div class="sub-card p-2">
-                    <div class="text-[12px] text-slate-300">${['Business Unit','Subsidiary','Region'][i]}</div>
-                    <div id="flowGrp${k}" class="mt-1 grid grid-cols-8 gap-1.5"></div>
-                    <div class="mx-auto mt-1 bolt-line h-16 w-1 bg-gradient-to-b from-sky-300 via-white to-sky-300" style="--d:${.9 + .15*i}s"></div>
+            <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
+              ${['Business Unit','Subsidiary','Region'].map((lbl,i)=>`
+                <div class="rounded-xl border border-white/10 bg-[#0a1124] p-2">
+                  <div class="text-[12px] text-slate-300">${lbl}</div>
+                  <div id="flowGrp${String.fromCharCode(65+i)}" class="mt-1 grid grid-cols-8 gap-1.5"></div>
+                  <div class="mx-auto mt-1 h-16 w-1 origin-top scale-y-0 rounded bg-gradient-to-b from-amber-300 via-white to-amber-300 transition-transform duration-700" style="transition-delay:${1000 + 150*i}ms" data-flow="drop"></div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
+              ${['Windows & macOS','VDI / Web','Mobile'].map((lbl,i)=>`
+                <div class="rounded-xl border border-white/10 bg-[#0a1124] p-2 text-center">
+                  <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-slate-300"></i>
+                  <div id="flowDev${String.fromCharCode(65+i)}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
+                  <div class="mt-1 text-[11px] text-slate-400">${lbl}</div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="mt-3">
+              <div id="endUserCard" class="rounded-xl border border-white/10 bg-[#0b1328] p-3">
+                <div class="flex items-center gap-3">
+                  <div id="endUserAvatar" class="h-9 w-9 rounded-full bg-rose-600/90 grid place-items-center font-semibold">U</div>
+                  <div class="text-sm">
+                    <div class="font-medium text-slate-200">End user</div>
+                    <div class="text-slate-400">Apps on demand — no waiting, no tickets.</div>
                   </div>
-                `).join('')}
+                </div>
+                <div class="mt-3 h-1 w-full origin-left scale-x-0 rounded bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400 transition-transform duration-700" style="transition-delay:2100ms" data-flow="beam"></div>
+                <div class="relative mt-2 rounded-lg border border-white/10 bg-[#0b1328] p-4">
+                  <i data-lucide="laptop" class="h-5 w-5 opacity-80"></i>
+                  <div id="endUserBadge" class="absolute right-2 top-2 grid h-5 w-5 place-items-center rounded bg-rose-500 text-black font-bold opacity-0 translate-y-[-6px] scale-90 transition-all duration-500">!</div>
+                  <div class="mt-1 text-[11px] text-slate-400">Workspace launches the correct app instantly</div>
+                </div>
+              </div>
+              <div id="flowSuccess" class="mt-2 hidden text-emerald-300 text-[13px] inline-flex items-center gap-1">
+                <i data-lucide="check-circle-2" class="h-4 w-4"></i><span>Delivered to every device type</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderROI(){
+      const i = STATE.roiInputs;
+      const calc = computeROI();
+      return `
+        <section id="panel-roi" role="tabpanel" aria-labelledby="tab-roi" class="space-y-3">
+          <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
+              <div class="flex items-center gap-2 mb-2">
+                <i data-lucide="calculator" class="w-5 h-5"></i>
+                <h3 class="text-base font-semibold">Inputs</h3>
+              </div>
+              <form id="roiForm" class="grid grid-cols-2 gap-3" novalidate>
+                ${roiInput('Users','users',i.users,'number','Total employees in scope')}
+                ${roiInput('Tickets per user / month','ticketsPerUserPerMonth',i.ticketsPerUserPerMonth,'number','Average app/helpdesk tickets per user per month')}
+                ${roiInput('Avg handle time (mins / ticket)','avgHandleMins',i.avgHandleMins,'number','Analyst time per ticket')}
+                ${roiInput('Loaded cost ($/hr)','loadedCostPerHour',i.loadedCostPerHour,'number','Fully-loaded hourly cost')}
+                ${roiInput('Recast annual cost ($)','recastAnnualCost',i.recastAnnualCost,'number','License + support')}
+                <div class="col-span-2 flex items-center gap-2">
+                  <button type="button" data-action="reset-impact" class="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 hover:bg-white/20 text-sm">Reset impact</button>
+                  <div class="text-xs text-slate-400">Impact set above feeds this ROI.</div>
+                </div>
+              </form>
+            </div>
+
+            <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
+              <div class="flex items-center gap-2 mb-2">
+                <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                <h3 class="text-base font-semibold">Results</h3>
               </div>
 
-              <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
-                ${['A','B','C'].map((k,i)=>`
-                  <div class="sub-card p-2 text-center">
-                    <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-slate-300"></i>
-                    <div id="flowDev${k}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
-                    <div class="mt-1 text-[11px] text-slate-400">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
-                  </div>
-                `).join('')}
-              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="rounded-xl border border-white/10 bg-[#0a1124] p-3">
+                  <div class="text-[12px] text-slate-400">End-user time saved / year</div>
+                  <div id="outEndUser" class="mt-1 text-xl font-semibold">${calc.endUserHoursF}</div>
+                  <div class="text-[12px] text-slate-400">${calc.endUserValueF}</div>
+                </div>
 
-              <!-- End user (single card that turns red → green) -->
-              <div class="mt-3">
-                <div id="endUserCard" class="sub-card p-3">
-                  <div class="flex items-center gap-3">
-                    <div id="endUserAvatar" class="h-9 w-9 rounded-md bg-rose-600/90 grid place-items-center font-semibold">U</div>
-                    <div class="text-sm">
-                      <div class="font-medium text-slate-200">End user</div>
-                      <div class="text-slate-400">Apps on demand — no waiting, no tickets.</div>
-                    </div>
-                  </div>
+                <div class="rounded-xl border border-white/10 bg-[#0a1124] p-3">
+                  <div class="text-[12px] text-slate-400">Packaging hours avoided</div>
+                  <div id="outPkgHrs" class="mt-1 text-xl font-semibold">${calc.pkgHoursF}</div>
+                  <div class="text-[12px] text-slate-400">${calc.pkgValueF}</div>
+                </div>
 
-                  <div id="flowHubFlash" class="mt-3 hidden rounded-md bg-white/10 p-2 text-xs text-white">Routing update propagated</div>
-                  <div id="flowSuccess" class="mt-3 hidden rounded-md bg-emerald-600/20 p-2 text-xs text-emerald-200">Success — user can launch immediately</div>
+                <div class="rounded-xl border border-white/10 bg-[#0a1124] p-3">
+                  <div class="text-[12px] text-slate-400">Security window reduced</div>
+                  <div id="outRisk" class="mt-1 text-xl font-semibold">${round(STATE.impact.riskHrs)} hrs</div>
+                  <div class="text-[12px] text-slate-400">Qualitative risk reduction</div>
+                </div>
 
-                  <div class="mt-3 h-1 w-full rounded bg-white/10">
-                    <div class="user-beam w-1/3 bg-gradient-to-r from-sky-400 via-blue-500 to-cyan-400" style="--d:1.2s"></div>
-                  </div>
-
-                  <div class="mt-3 flex items-center gap-2">
-                    <div id="endUserBadge" class="badge grid h-5 w-5 place-items-center bg-rose-500 text-xs font-bold text-white" style="--d:1.6s">!</div>
-                    <div class="text-xs text-slate-300">Status badge flips after orchestration completes.</div>
-                  </div>
+                <div class="rounded-xl border border-white/10 bg-[#0a1124] p-3">
+                  <div class="text-[12px] text-slate-400">Annual net ROI</div>
+                  <div id="outNet" class="mt-1 text-2xl font-extrabold ${calc.net>0?'text-emerald-300':'text-rose-300'}">${calc.netF}</div>
+                  <div class="text-[12px] text-slate-400">Payback: ${calc.paybackText}</div>
                 </div>
               </div>
 
-              <div class="mt-3 flex justify-end gap-2">
-                <button type="button" class="rounded-full px-3 py-1.5 text-xs font-semibold text-white focus-ring" data-action="run-flow"><i data-lucide="zap" class="w-3.5 h-3.5"></i> Orchestrate</button>
-                <button type="button" class="rounded-full px-3 py-1.5 text-xs font-semibold text-white/90 hover:text-white focus-ring" data-action="reset-flow">Reset</button>
+              <div class="mt-3 rounded-lg border border-white/10 bg-[#0a1124] p-3">
+                <div class="text-[12px] text-slate-400">Assumptions</div>
+                <ul class="mt-1 list-disc pl-5 text-sm text-slate-300 space-y-1">
+                  <li>Minutes saved is per user per month, applied to all users in scope.</li>
+                  <li>Packaging hours avoided are direct engineering time savings.</li>
+                  <li>Security window reduction is reported qualitatively.</li>
+                </ul>
               </div>
             </div>
           </div>
-        </div>
-      `;
-    }
-
-    /* ---------- Tab 3: Impact & ROI ---------- */
-    function renderROI(){
-      const r = computeROI(STATE.roiInputs, STATE.impact);
-      return `
-        <section id="panel-roi" class="space-y-3">
-          <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
-            <div class="section-card p-4">
-              <h3 class="text-base font-semibold">Inputs</h3>
-              <div class="mt-3 grid grid-cols-2 gap-2">
-                ${numInput('Users', 'users', r.i.users)}
-                ${numInput('Tickets per user / month', 'ticketsPerUserPerMonth', r.i.ticketsPerUserPerMonth)}
-                ${numInput('Avg handle (mins)', 'avgHandleMins', r.i.avgHandleMins)}
-                ${numInput('Loaded cost ($/hr)', 'loadedCostPerHour', r.i.loadedCostPerHour)}
-                ${numInput('Recast annual cost ($)', 'recastAnnualCost', r.i.recastAnnualCost)}
-              </div>
-              <div class="mt-3 text-[11px] text-slate-400">All values are editable examples. Replace with your data for accurate estimates.</div>
-            </div>
-
-            <div class="section-card p-4">
-              <h3 class="text-base font-semibold">Results</h3>
-              <div class="mt-3 space-y-2 text-sm">
-                ${kvId('Hours saved / month', r.totalHoursSavedMonth, 'res-hours')}
-                ${kvId('$ saved / month', '$'+num(r.dollarSavedMonth), 'res-month')}
-                ${kvId('$ saved / year', '$'+num(r.dollarSavedYear), 'res-year')}
-                ${kvId('Net benefit / year', '$'+num(r.netBenefitYear), 'res-net')}
-                ${kvId('ROI', r.roiPct+'%', 'res-roi')}
-                ${kvId('Equivalent IT FTEs freed', r.fteEquivalent, 'res-fte')}
-              </div>
-              <div class="mt-2 text-[11px] text-slate-400 italic">Tip: tailor a short proof point here (e.g., “Cut packaging time by 80% in first 30 days”).</div>
-              <div class="mt-4 flex flex-wrap gap-2">
-                <button type="button" data-action="reset-calculator" class="rounded-full px-4 py-2 text-sm font-semibold text-white focus-ring">Reset</button>
-                <button type="button" data-action="copy-onepager" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-900 hover:brightness-95 focus-ring">
-                  <i data-lucide="clipboard" class="w-4 h-4"></i> ${STATE.copied ? 'Copied!' : 'Copy executive one-pager'}
-                </button>
-              </div>
-            </div>
-
-            <div class="section-card p-4">
-              <h3 class="text-base font-semibold">Impact tracker</h3>
-              <div class="mt-3 grid grid-cols-3 gap-2">
-                ${impactStat('Minutes saved', STATE.impact.minutes, 'clock-4', 'Per user each month')}
-                ${impactStat('Packaging hours', STATE.impact.pkgHours, 'package-check', 'Across apps / month')}
-                ${impactStat('Risk hours', STATE.impact.riskHrs, 'shield-check', 'Zero-day mitigation')}
-              </div>
-            </div>
-          </div>
-
-          <p class="text-[11px] text-slate-400">Transparency: Recast demo environment, Windows/macOS focus. Metrics are illustrative; actuals vary.</p>
         </section>
       `;
     }
 
-    function impactStat(label,value,icon,hint){
+    function roiInput(label,key,val,type,hint){
       return `
-        <div class="sub-card p-3">
-          <div class="flex items-center justify-between rounded-md bg-white/5 px-3 py-2">
-            <div>
-              <div class="text-[11px] text-slate-300">${label}</div>
-              <div class="text-xl font-semibold">${value}</div>
-            </div>
-            <i data-lucide="${icon}" class="w-5 h-5 text-sky-300"></i>
-          </div>
-          ${hint ? `<div class="mt-1 text-[11px] text-slate-400">${hint}</div>` : ''}
-        </div>
+        <label class="flex flex-col gap-1">
+          <span class="text-sm text-slate-200">${label}</span>
+          <input type="${type}" inputmode="decimal" value="${val}" data-roi="${key}" class="rounded border border-white/10 bg-slate-950 px-3 py-2 text-slate-100" aria-describedby="${key}-hint">
+          <span id="${key}-hint" class="text-[11px] text-slate-400">${hint}</span>
+        </label>
       `;
     }
-    function kvId(label,value,id){
-      return `<div class="flex items-center justify-between rounded-md bg-white/5 px-3 py-2"><div>${label}</div><div><span id="${id}" class="font-semibold">${value}</span></div>`;
-    }
-    function numInput(label,key,value){
-      return `<label class="flex flex-col gap-1 text-sm"><span class="text-[12px] text-slate-300">${label}</span><input class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-1.5 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
+
+    function computeROI(){
+      const i = STATE.roiInputs;
+      const users = clamp(cleanNum(i.users), 0, 10_000_000);
+      const minPerUserPerMonth = clamp(cleanNum(STATE.impact.minutes), 0, 10_000);
+      const endUserHours = users * (minPerUserPerMonth/60) * 12;
+      const loaded = clamp(cleanNum(i.loadedCostPerHour), 0, 10_000);
+      const endUserValue = endUserHours * loaded * 0.2; // conservative 20% capture of end-user time into value
+      const pkgHours = clamp(cleanNum(STATE.impact.pkgHours), 0, 1_000_000);
+      const pkgValue = pkgHours * loaded;
+      const gross = endUserValue + pkgValue;
+      const cost = clamp(cleanNum(i.recastAnnualCost), 0, 100_000_000);
+      const net = gross - cost;
+      const paybackMonths = gross>0 ? Math.max(0, Math.ceil((cost / Math.max(1, gross)) * 12)) : '—';
+      return {
+        endUserHours, endUserValue, pkgHours, pkgValue, net,
+        endUserHoursF: `${num(endUserHours)} hrs`,
+        endUserValueF: `$${num(endUserValue)}/yr`,
+        pkgHoursF: `${num(pkgHours)} hrs`,
+        pkgValueF: `$${num(pkgValue)}/yr`,
+        netF: `$${num(net)}/yr`,
+        paybackText: typeof paybackMonths==='number' ? `${paybackMonths} mo` : 'n/a'
+      };
     }
 
-    /* ---------- Realistic Catalog (brand-like marks) ---------- */
-    const CATALOG=[
-      {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
-        logo('Microsoft Word','W','#185ABD'),
-        logo('Microsoft Excel','X','#107C41'),
-        logo('PowerPoint','P','#D24726'),
-        logo('Outlook','O','#106EBE'),
-        logo('Microsoft Teams','T','#5B53D6'),
-        logo('Google Docs','Dc','#1A73E8'),
-        logo('Google Sheets','Sh','#1E8E3E'),
-        logo('Google Slides','Sl','#F9AB00')
-      ]},
-      {title:'MESSAGING & MEETINGS',id:'cat-collab',items:[
-        logo('Slack','S','#4A154B'),
-        logo('Zoom','Z','#2D8CFF'),
-        logo('Webex','Wx','#34B7F1'),
-        triLogo('RingCentral','#FF9800','#1D4ED8','#111827','#F59E0B'),
-        ringLogo('BlueJeans','#0B5FFF','#22D3EE'),
-        logo('Teams Rooms','Tr','#5B53D6')
-      ]},
-      {title:'BROWSERS',id:'cat-browsers',items:[
-        multiLogo('Microsoft Edge',['#0E9F6E','#10B981','#34D399','#059669']),
-        ringLogo('Google Chrome','#DB4437','#F4B400'),
-        triLogo('Mozilla Firefox','#FF7139','#FFB400','#00539F','#1F1F1F')
-      ]},
-      {title:'DEVELOPER TOOLS',id:'cat-dev',items:[
-        logo('Visual Studio Code','V','#007ACC'),
-        logo('GitHub Desktop','Gh','#181717'),
-        logo('Postman','Pm','#FF6C37'),
-        logo('Docker','Dk','#2496ED'),
-        logo('Node.js','N','#339933'),
-        logo('JetBrains Toolbox','Jb','#000000')
-      ]},
-      {title:'GRAPHICS & DESIGN',id:'cat-design',items:[
-        multiLogo('Adobe Photoshop',['#31A8FF','#001E36','#0D99FF']),
-        logo('Figma','Fg','#F24E1E'),
-        logo('Sketch','Sk','#FDB300'),
-        logo('Canva','Ca','#00C4CC')
-      ]},
-      {title:'UTILITIES & SECURITY',id:'cat-utils',items:[
-        logo('7-Zip','7z','#000000'),
-        logo('Notepad++','N+','#90E59A'),
-        logo('WinRAR','Wr','#4D2B90'),
-        logo('Malwarebytes','Mb','#0B5FFF'),
-        flameLogo('CrowdStrike','#FF6A00','#FFC300'),
-        logo('SentinelOne','S1','#5E2BFF')
-      ]}
-    ];
+    function updateROIOutputs(){
+      const calc = computeROI();
+      const el = (id)=>document.getElementById(id);
+      if (el('outEndUser')) el('outEndUser').textContent = calc.endUserHoursF;
+      if (el('outPkgHrs')) el('outPkgHrs').textContent = calc.pkgHoursF;
+      if (el('outNet')) el('outNet').textContent = calc.netF;
+      if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
+    }
 
-    function catalogRow(title,id,items){
-      return `
-        <div class="cat-row">
-          <div class="text-[12px] tracking-wide text-slate-300">${title}</div>
-          <div id="${id}" class="flex flex-wrap items-center gap-2">${items.map(l=>appLogo(l)).join('')}</div>
-        </div>
-      `;
-    }
-    function appLogo({name,svg}){
-      return `<div class="logo-wrap" title="${name}"><div class="logo-ring" aria-hidden="true">${svg}</div><div class="logo-name">${name}</div></div>`;
-    }
-    function logo(name,letter,color){
-      return { name, svg:
-        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${letter}">
-          <defs><linearGradient id="g${letter.replace(/\W/g,'')}" x1="0" x2="1"><stop offset="0" stop-color="${shade(color,.9)}"/><stop offset="1" stop-color="${shade(color,1.1)}"/></linearGradient></defs>
-          <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#g${letter.replace(/\W/g,'')})" stroke="rgba(255,255,255,.15)"/>
-          <text x="50%" y="56%" text-anchor="middle" font-size="22" font-family="Inter,system-ui,Segoe UI,Arial" font-weight="800" fill="white">${letter}</text>
-        </svg>`};
-    }
-    function multiLogo(name,colors){
-      const slices=colors.map((c,i)=>`<rect x="${4+i*9}" y="8" width="7" height="32" rx="4" fill="${c}"></rect>`).join('');
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/>${slices}</svg>` };
-    }
-    function triLogo(name,r1,r2,r3,r4){
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="${r4||'#0b1226'}" stroke="rgba(255,255,255,.15)"/><path d="M24 12 L36 36 H12 Z" fill="${r1}"/><circle cx="24" cy="24" r="6" fill="${r2}"/><path d="M24 36 A12 12 0 0 1 24 12 L24 24 Z" fill="${r3}"/></svg>` };
-    }
-    function ringLogo(name,c1,c2){
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/><circle cx="24" cy="24" r="11" fill="${c1}"/><circle cx="20" cy="20" r="8" fill="${c2}"/></svg>` };
-    }
-    function flameLogo(name,c1,c2){
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/><path d="M24 34 C14 30, 18 20, 24 16 C30 20, 34 30, 24 34 Z" fill="${c1}"/><circle cx="26" cy="28" r="4" fill="${c2}"/></svg>` };
-    }
-    function shade(hex,m){ const c=hex.replace('#',''); const n=[parseInt(c.substr(0,2),16),parseInt(c.substr(2,2),16),parseInt(c.substr(4,2),16)]; const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
+    function buildFlow(){
+      const dot = ()=> {
+        const d = document.createElement('div');
+        d.className = 'h-2 w-2 rounded bg-slate-600 opacity-90';
+        return d;
+      };
+      const fillTiles = (id, count)=> {
+        const host = document.getElementById(id);
+        if (!host) return;
+        host.innerHTML = '';
+        for (let i=0;i<count;i++){ host.appendChild(dot()); }
+      };
+      CATALOG.forEach((row, idx)=>{
+        const host = document.getElementById(row.id);
+        if (!host) return;
+        host.innerHTML = '';
+        row.apps.forEach((name,i)=>{
+          const b = document.createElement('div');
+          b.className = 'flex items-center gap-2 rounded-lg border border-white/10 bg-[#0a1226] px-2 py-1';
+          b.innerHTML = `
+            <span class="grid h-8 w-8 place-items-center rounded-full bg-[#0a1226] ring-1 ring-white/15">
+              <i data-lucide="app-window" class="w-4 h-4"></i>
+            </span>
+            <span class="text-xs text-slate-300 ${STATE.showLabels?'':'sr-only'}">${name}</span>
+          `;
+          host.appendChild(b);
+        });
+      });
 
-    /* ---------- Events ---------- */
+      ['A','B','C'].forEach((k, i)=>{
+        fillTiles(`flowConn${k}`, 10);
+        fillTiles(`flowGrp${k}`, 8);
+        fillTiles(`flowDev${k}`, 6);
+      });
+
+      const bars = Array.from(document.querySelectorAll('[data-flow="bar"]'));
+      const drops = Array.from(document.querySelectorAll('[data-flow="drop"]'));
+      const beam = document.querySelector('[data-flow="beam"]');
+      const badge = document.getElementById('endUserBadge');
+      const avatar = document.getElementById('endUserAvatar');
+      const success = document.getElementById('flowSuccess');
+      const flash = document.getElementById('flowHubFlash');
+
+      const run = ()=>{
+        flash.classList.remove('hidden');
+        setTimeout(()=>flash.classList.add('hidden'), 900);
+
+        bars.forEach((el, idx)=> {
+          setTimeout(()=>{ el.style.transform = 'scaleX(1)'; }, 50 + idx*100);
+        });
+        drops.forEach((el, idx)=> {
+          setTimeout(()=>{ el.style.transform = 'scaleY(1)'; }, 600 + idx*120);
+        });
+        setTimeout(()=>{
+          if (beam){ beam.style.transform = 'scaleX(1)'; }
+        }, 2100);
+        setTimeout(()=>{
+          if (badge){
+            badge.style.opacity = '1';
+            badge.style.transform = 'translateY(0) scale(1)';
+            badge.textContent = '✓';
+            badge.classList.remove('bg-rose-500');
+            badge.classList.add('bg-emerald-400');
+          }
+          if (avatar){
+            avatar.classList.remove('bg-rose-600/90');
+            avatar.classList.add('bg-emerald-600/90');
+          }
+          if (success){ success.classList.remove('hidden'); }
+        }, 2500);
+      };
+      run();
+      if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
+    }
+
     function attachEvents(){
-      const root=document.getElementById('app');
-
-      root.querySelectorAll('[data-action="switch-tab"]').forEach(b=>b.addEventListener('click',e=>{
-        STATE.activeTab=e.currentTarget.getAttribute('data-tab'); render();
-      }));
-      root.querySelectorAll('[data-action="advance"]').forEach(b=>b.addEventListener('click',e=>{
-        STATE.activeTab=e.currentTarget.getAttribute('data-next'); render();
-      }));
-
-      root.querySelectorAll('[data-action="run-flow"]').forEach(b=>b.addEventListener('click',startFlow));
-      const rf=root.querySelector('[data-action="reset-flow"]'); if(rf) rf.addEventListener('click',resetFlowTiles);
-
-      root.querySelectorAll('[data-action="set-device"]').forEach(b=>b.addEventListener('click',e=>{
-        STATE.ctx.device=e.currentTarget.getAttribute('data-value');
-        render();
-      }));
-      root.querySelectorAll('[data-action="set-network"]').forEach(b=>b.addEventListener('click',e=>{
-        STATE.ctx.network=e.currentTarget.getAttribute('data-value');
-        render();
-      }));
-      root.querySelectorAll('[data-action="toggle-compliance"]').forEach(b=>b.addEventListener('click',()=>{
-        STATE.ctx.compliant=!STATE.ctx.compliant;
-        render();
-      }));
-
-      const inpHrs=root.querySelector('[data-action="set-current-hrs"]');
-      if(inpHrs) inpHrs.addEventListener('input',e=>{
-        STATE.currentHrs=cleanNum(e.currentTarget.value);
-        render();
+      document.querySelectorAll('[data-action="switch-tab"]').forEach(btn=>{
+        btn.addEventListener('click', (e)=>{
+          const tab = e.currentTarget.getAttribute('data-tab');
+          STATE.activeTab = tab;
+          render();
+        });
       });
 
-      root.querySelectorAll('[data-action="add-impact"]').forEach(b=>b.addEventListener('click',e=>{
-        const k=e.currentTarget.getAttribute('data-kind');
-        const v=Number(e.currentTarget.getAttribute('data-value'))||0;
-        STATE.impact[k]=(STATE.impact[k]||0)+v;
-        render();
-      }));
+      const main = document.getElementById('main');
 
-      root.querySelectorAll('[data-action="set-roi"]').forEach(b=>b.addEventListener('input',e=>{
-        const key=e.currentTarget.getAttribute('data-key');
-        STATE.roiInputs[key]=cleanNum(e.currentTarget.value);
-        const r=computeROI(STATE.roiInputs, STATE.impact);
-        // Live-update without full re-render
-        const ids=['res-hours','res-month','res-year','res-net','res-roi','res-fte'];
-        const vals=[r.totalHoursSavedMonth,'$'+num(r.dollarSavedMonth),'$'+num(r.dollarSavedYear),'$'+num(r.netBenefitYear),r.roiPct+'%',r.fteEquivalent];
-        ids.forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.textContent=vals[i]; });
-      }));
+      main.addEventListener('click', (e)=>{
+        const a = e.target.closest('[data-action]');
+        if(!a) return;
+        const action = a.getAttribute('data-action');
 
-      const resetBtn=root.querySelector('[data-action="reset-calculator"]');
-      if(resetBtn) resetBtn.addEventListener('click',()=>{
-        STATE.roiInputs = { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 };
-        STATE.impact = { ...STATE.defaults.impact };
-        STATE.copied = false;
-        render();
+        if (action === 'advance'){
+          const next = a.getAttribute('data-next') || 'solution';
+          STATE.activeTab = next;
+          render();
+        }
+
+        if (action === 'toggle-labels'){
+          STATE.showLabels = !STATE.showLabels;
+          render();
+        }
+
+        if (action === 'start-flow'){
+          buildFlow();
+        }
+
+        if (action === 'reset-flow'){
+          render();
+        }
+
+        if (action === 'add-impact'){
+          const kind = a.getAttribute('data-kind');
+          const val = cleanNum(a.getAttribute('data-value'));
+          if (kind && !Number.isNaN(val)){
+            if (kind === 'minutes') STATE.impact.minutes = round(STATE.impact.minutes + val);
+            if (kind === 'pkgHours') STATE.impact.pkgHours = round(STATE.impact.pkgHours + val);
+            if (kind === 'riskHrs') STATE.impact.riskHrs = round(STATE.impact.riskHrs + val);
+            render();
+          }
+        }
+
+        if (action === 'set-device'){
+          STATE.ctx.device = a.getAttribute('data-value') || 'Windows';
+          render();
+        }
+
+        if (action === 'set-network'){
+          STATE.ctx.network = a.getAttribute('data-value') || 'Corporate';
+          render();
+        }
+
+        if (action === 'toggle-compliance'){
+          STATE.ctx.compliant = !STATE.ctx.compliant;
+          render();
+        }
+
+        if (action === 'copy-json'){
+          const payload = {
+            impact: STATE.impact,
+            context: STATE.ctx,
+            roiInputs: STATE.roiInputs
+          };
+          try{
+            navigator.clipboard.writeText(JSON.stringify(payload, null, 2)).then(()=>{
+              STATE.copied = true;
+              render();
+              setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
+            }).catch(()=>{
+              alert('Clipboard copy failed. Select and copy manually:\n\n' + JSON.stringify(payload, null, 2));
+            });
+          }catch(err){
+            alert('Clipboard not available. Select and copy manually:\n\n' + JSON.stringify(payload, null, 2));
+          }
+        }
+
+        if (action === 'reset-impact'){
+          STATE.impact = JSON.parse(JSON.stringify(STATE.defaults.impact));
+          render();
+        }
       });
 
-      const copyBtn=root.querySelector('[data-action="copy-onepager"]');
-      ifcopy: if(copyBtn) copyBtn.addEventListener('click', async ()=>{
-        const i = STATE.roiInputs;
-        const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
-        const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
-        const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
-        const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
-        const dollarSavedYear = dollarSavedMonth * 12;
-        const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
-        const roiPct = i.recastAnnualCost ? (netBenefitYear / i.recastAnnualCost) * 100 : 0;
-        const fteHoursYear = 2080;
-        const fteEquivalent = (totalHoursSavedMonth * 12) / fteHoursYear;
-        const body =
-`Recast Application Workspace — Executive One-Pager
-
-Assumptions
- - Users: ${i.users}
- - Tickets per user / month: ${i.ticketsPerUserPerMonth}
- - Avg handle: ${i.avgHandleMins} mins
- - Loaded cost: $${i.loadedCostPerHour}/hr
- - Subscription (annual): $${i.recastAnnualCost}
-
-Observed demo impact (illustrative)
- - Minutes saved per user (monthly): ${STATE.impact.minutes}
- - Packaging hours saved / month: ${STATE.impact.pkgHours}
- - Zero-day risk hours reduced / month: ${STATE.impact.riskHrs}
-
-Results
- - Hours saved / month: ${totalHoursSavedMonth.toFixed(1)}
- - $ saved / month: $${Math.round(dollarSavedMonth).toLocaleString()}
- - $ saved / year: $${Math.round(dollarSavedYear).toLocaleString()}
- - Net benefit / year: $${Math.round(netBenefitYear).toLocaleString()}
- - ROI: ${roiPct.toFixed(0)}%
- - Equivalent IT FTEs freed: ${fteEquivalent.toFixed(2)}
-
-Notes
- - Replace with your data for accurate estimates.`;
-        try{
-          await navigator.clipboard.writeText(body);
-          STATE.copied=true; render();
-        }catch(err){
-          alert('Copy failed. Please select and copy manually.');
+      main.addEventListener('input', (e)=>{
+        const t = e.target;
+        if (t.matches('[data-action="set-pack-hrs"]')){
+          STATE.packHrs = clamp(cleanNum(t.value), 0, 1000);
+        }
+        if (t.matches('[data-action="set-config-hrs"]')){
+          STATE.configHrs = clamp(cleanNum(t.value), 0, 1000);
+        }
+        if (t.matches('[data-action="set-current-hrs"]')){
+          STATE.currentHrs = clamp(cleanNum(t.value), 0, 1000);
+        }
+        if (t.matches('[data-roi]')){
+          const key = t.getAttribute('data-roi');
+          const val = cleanNum(t.value);
+          STATE.roiInputs[key] = val;
+          updateROIOutputs();
         }
       });
     }
 
-    function computeROI(i, impact){
-      const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
-      const hoursFromMinutes = (impact.minutes * i.users) / 60;
-      const totalHoursSavedMonth = hoursFromMinutes + impact.pkgHours + impact.riskHrs;
-      const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
-      const dollarSavedYear = dollarSavedMonth * 12;
-      const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
-      const roiPct = i.recastAnnualCost ? Math.round((netBenefitYear / i.recastAnnualCost) * 100) : 0;
-      const fteHoursYear = 2080;
-      const fteEquivalent = Math.round(((totalHoursSavedMonth * 12) / fteHoursYear) * 100) / 100;
-      return { i, totalHoursSavedMonth, dollarSavedMonth, dollarSavedYear, netBenefitYear, roiPct, fteEquivalent };
-    }
-
-    /* ---------- Flow helpers ---------- */
-    function resetFlowTiles(){
-      buildTiles(document.getElementById('flowGrpA'), 18, .95);
-      buildTiles(document.getElementById('flowGrpB'), 18, 1.0);
-      buildTiles(document.getElementById('flowGrpC'), 18, 1.05);
-      buildTiles(document.getElementById('flowDevA'), 10, 1.5);
-      buildTiles(document.getElementById('flowDevB'), 10, 1.55);
-      buildTiles(document.getElementById('flowDevC'), 10, 1.6);
-
-      // Reset end-user state to "red"
-      const avatar=document.getElementById('endUserAvatar');
-      const badge=document.getElementById('endUserBadge');
-      if(avatar){ avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); avatar.textContent='U'; }
-      if(badge){ badge.textContent='!'; badge.classList.remove('bg-rose-500'); badge.classList.add('bg-rose-500'); }
-    }
-    function buildTiles(container,count,baseDelay){
-      if(!container) return; container.innerHTML='';
-      for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='tile'; d.style.setProperty('--d',(baseDelay+i*0.04).toFixed(2)+'s'); container.appendChild(d); }
-    }
-
-    function startFlow(){
-      const card=document.getElementById('flowCard'); if(!card) return;
-      card.classList.remove('run'); void card.offsetWidth; card.classList.add('run');
-      const flash=document.getElementById('flowHubFlash'); const success=document.getElementById('flowSuccess');
-      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
-      if(flash){ flash.classList.remove('hidden'); setTimeout(()=>flash.classList.add('hidden'),1000); }
-      if(success) success.classList.add('hidden');
-      // Turn end user green after flow complete
-      setTimeout(()=>{
-        if(avatar){ avatar.classList.remove('bg-rose-600/90'); avatar.classList.add('bg-emerald-500'); }
-        if(badge){ badge.textContent='✓'; badge.classList.remove('bg-rose-500'); badge.classList.add('bg-green-500'); }
-      }, 2100);
-      setTimeout(()=> success && success.classList.remove('hidden'), 2500);
-    }
-
-    function resetFlowTilesOnly(){
-      const card=document.getElementById('flowCard'); if(!card) return;
-      card.classList.remove('run');
-      const success=document.getElementById('flowSuccess'); if(success) success.classList.add('hidden');
-      // Reset end user to red
-      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
-      if(avatar){ avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); }
-      if(badge){ badge.textContent='!'; badge.classList.remove('bg-green-500'); badge.classList.add('bg-rose-500'); }
-    }
-    function resetFlowTiles(){ resetFlowTilesOnly(); }
-
-    /* ---------- Init ---------- */
-    document.addEventListener('DOMContentLoaded', ()=>{ const y=document.getElementById("year"); if(y) y.textContent=new Date().getFullYear(); render(); });
+    document.addEventListener('DOMContentLoaded', render);
   </script>
-
-  <footer class="mt-10 border-t border-white/10">
-    <div class="mx-auto max-w-6xl px-4 py-6 flex items-center justify-between">
-      <div class="text-xs text-[#E4EAF7]">© <span id="year"></span> Recast</div>
-      <div class="inline-flex items-center gap-2">
-        <span class="sr-only">Recast mark</span>
-        <span class="grid place-items-center w-7 h-7 rounded-md" style="background:#0f1c5a">
-          <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#1F289B] via-[#0471FB] to-[#30D1FE] font-extrabold">Re</span>
-        </span>
-      </div>
-    </div>
-  </footer>
 </body>
 </html>
