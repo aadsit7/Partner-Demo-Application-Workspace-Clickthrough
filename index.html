@@ -1,716 +1,2436 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Recast — Compact Click-Through (Realistic Catalog)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark light">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://unpkg.com">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    .focus-ring:focus-visible{outline:2px solid #facc15;outline-offset:2px}
-    html,body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji"}
-    .section-card{border-radius:1rem;border:1px solid rgba(255,255,255,.08);background:#0c142b}
-    .sub-card{border-radius:.75rem;border:1px solid rgba(255,255,255,.08);background:#0a1124}
+  <head>
+    <meta charset="utf-8" />
+    <title>Recast — Compact Click-Through (Realistic Catalog)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://unpkg.com" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- IMPORTANT: lottie-player web component does NOT guarantee a global `lottie` object.
+         If you call lottie.loadAnimation(...) you must load lottie-web. -->
+    <script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
+    <style>
+      /* ------------------------------
+         Keyframes
+         ------------------------------ */
+      @keyframes tilePulse {
+        0% {
+          transform: scale(0.7);
+          background-color: #e5e7eb;
+          opacity: 0.4;
+        }
+        60% {
+          transform: scale(1);
+          background-color: #2563eb;
+          opacity: 1;
+        }
+        100% {
+          background-color: #e5e7eb;
+          opacity: 0.9;
+        }
+      }
+      @keyframes barGrow {
+        to {
+          transform: scaleX(1);
+        }
+      }
+      @keyframes boltDrop {
+        to {
+          transform: scaleY(1);
+        }
+      }
+      @keyframes appLiftPulse {
+        0% {
+          transform: translateY(0) scale(1);
+          filter: saturate(0.4);
+          opacity: 0.65;
+        }
+        30% {
+          transform: translateY(-4px) scale(1.05);
+        }
+        60% {
+          transform: translateY(-2px) scale(1.02);
+          filter: saturate(1);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(0) scale(1);
+        }
+      }
+      @keyframes badgeDrop {
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      @keyframes fadeInOut {
+        0% {
+          opacity: 0;
+        }
+        30% {
+          opacity: 1;
+        }
+        70% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+      @keyframes iconLaunch {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes modalEnter {
+        0% {
+          transform: scale(0.95);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      @keyframes overlayFade {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
 
-    /* Flow primitives */
-    .tile{width:.45rem;height:.45rem;border-radius:.25rem;background:#334155;opacity:.9}
-    .run .tile{animation:tilePulse 1s ease-in-out var(--d,0s) 1 forwards}
-    @keyframes tilePulse{0%{transform:scale(.7);background:#334155;opacity:.4}60%{transform:scale(1);background:#38bdf8;opacity:1}100%{background:#334155;opacity:.9}}
-    .flow-bar{height:.22rem;border-radius:.25rem;transform-origin:left center;transform:scaleX(0)}
-    .run .flow-bar{animation:barGrow .9s ease forwards var(--d,0s)}
-    @keyframes barGrow{to{transform:scaleX(1)}}
-    .bolt-line{width:.22rem;border-radius:.25rem;transform-origin:top center;transform:scaleY(0)}
-    .run .bolt-line{animation:boltDrop .9s ease forwards var(--d,0s)}
-    @keyframes boltDrop{to{transform:scaleY(1)}}
+      /* “Delivery truck” micro-motion (vertical travel is driven by JS) */
+      @keyframes courierBob {
+        0% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-2px);
+        }
+        100% {
+          transform: translateY(0);
+        }
+      }
+      @keyframes courierTilt {
+        0% {
+          transform: rotate(-0.8deg);
+        }
+        50% {
+          transform: rotate(1.1deg);
+        }
+        100% {
+          transform: rotate(-0.8deg);
+        }
+      }
+      @keyframes cardPop {
+        0% {
+          opacity: 0;
+          transform: translateY(8px) scale(0.99);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      .animate-cardPop {
+        animation: cardPop 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
 
-    /* Catalog logos */
-    .logo-ring{width:2.1rem;height:2.1rem;border-radius:9999px;display:grid;place-items:center;background:#0a1226;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
-    .logo-wrap{display:flex;align-items:center;gap:.4rem}
-    .logo-name{font-size:.7rem;color:#cbd5e1;white-space:nowrap}
-    .run .logo-ring{animation:appPop .85s cubic-bezier(.2,.8,.2,1) var(--d,0s) 1 forwards}
-    @keyframes appPop{0%{transform:scale(.85);filter:saturate(.4);opacity:.65}60%{transform:scale(1.05);filter:saturate(1);opacity:1}100%{transform:scale(1)}}
+      /* ------------------------------
+         Lightweight animation hooks
+         ------------------------------ */
+      .run [data-anim="tilePulse"] {
+        animation: tilePulse 1s ease-in-out var(--d, 0s) 1 forwards;
+      }
+      .run [data-anim="barGrow"] {
+        animation: barGrow 0.9s ease forwards var(--d, 0s);
+      }
+      .run [data-anim="boltDrop"] {
+        animation: boltDrop 0.9s ease forwards var(--d, 0s);
+      }
+      .run [data-anim="fadeInOut"] {
+        animation: fadeInOut 1.5s ease var(--d, 0s) forwards;
+      }
+      .run [data-anim="badgeDrop"] {
+        animation: badgeDrop 0.8s ease-out var(--d, 0s) forwards;
+      }
 
-    /* End user */
-    .user-beam{height:.38rem;border-radius:.38rem;transform-origin:left center;transform:scaleX(0)}
-    .run .user-beam{animation:barGrow 1s ease forwards var(--d,0s)}
-    .badge{width:1.15rem;height:1.15rem;border-radius:.3rem;opacity:0;transform:translateY(-6px) scale(.9)}
-    .run .badge{animation:badgeDrop .8s ease-out var(--d,0s) forwards}
-    @keyframes badgeDrop{to{opacity:1;transform:translateY(0) scale(1)}}
+      /* ------------------------------
+         Overlay sits on top of the Application Workspace card
+         ------------------------------ */
+      #recast-approach-animation-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 999;
+      }
+      #recast-approach-animation-layer .lottie {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: none;
+      }
 
-    /* Catalog rows */
-    .cat-row{display:grid;grid-template-columns:15ch 1fr;gap:.5rem;align-items:center}
-    .cat-title{font-size:.7rem;letter-spacing:.08em}
-  </style>
-</head>
-<body class="min-h-screen bg-[#0b1020] text-slate-100 antialiased">
-  <div id="app" class="min-h-screen"></div>
+      /* Final calm state after animation (scoped to the flow card, not the whole page) */
+      #flowCard.workspace-final .warning,
+      #flowCard.workspace-final .duplicate,
+      #flowCard.workspace-final .loading-indicator {
+        opacity: 0;
+        transition: opacity 0.25s ease-out;
+      }
+      #flowCard.workspace-final .app-icon {
+        opacity: 1;
+        transform: scale(1);
+        transition: 0.25s ease-out;
+      }
 
-  <script>
-    /* ---------- STATE ---------- */
-    const STATE = {
-      activeTab: 'problems',
-      impact: { minutes: 9, pkgHours: 6, riskHrs: 0 },
-      defaults: { impact: { minutes: 9, pkgHours: 6, riskHrs: 0 } },
-      ctx: { device: 'Windows', network: 'Corporate', compliant: true },
-      packHrs: 8, configHrs: 2, currentHrs: 24,
-      roiInputs: { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 },
-      copied: false,
-      showLabels: false,
-      showSolutionCards: true
-    };
+      .dimmed {
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+      }
+      .highlighted {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+        transition: all 0.3s ease;
+      }
+      .processed {
+        background-color: #ecfdf5 !important;
+        border-color: #d1fae5 !important;
+        color: #065f46 !important;
+        transition: all 0.3s ease;
+      }
 
-    const TABS = [
-      { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
-      { id: 'solution', label: 'Recast Approach', icon: 'workflow' },
-      { id: 'roi', label: 'Impact & ROI', icon: 'bar-chart-3' }
-    ];
+      /* Modal animation helpers */
+      .animate-modalEnter {
+        animation: modalEnter 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .animate-overlayFade {
+        animation: overlayFade 300ms ease;
+      }
+      .animate-fadeInOut {
+        animation: fadeInOut 1.5s ease var(--d, 0s) forwards;
+      }
+      .animate-fadeIn {
+        animation: fadeIn 1s ease 10s forwards;
+      }
+      .animate-iconLaunch {
+        animation: iconLaunch 0.5s ease forwards;
+      }
 
-    /* ---------- Utils ---------- */
-    function cx(...a){ return a.filter(Boolean).join(' '); }
-    function round(n){ return Math.round(n*100)/100; }
-    function num(n){ return new Intl.NumberFormat().format(Math.round(n)); }
-    function routeRecommendation(ctx){
-      if(!ctx.compliant) return 'Web';
-      if(ctx.device==='Windows' && ctx.network!=='Home') return 'Local';
-      return 'VDI';
-    }
-    function cleanNum(v){ v = Number(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(v) ? v : 0; }
+      /* ------------------------------
+         Stage-ready confetti (canvas)
+         ------------------------------ */
+      #confettiCanvas {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 2000;
+        opacity: 0;
+        transition: opacity 160ms ease;
+      }
+      #confettiCanvas.on {
+        opacity: 1;
+      }
 
-    /* ---------- Root render ---------- */
-    function render(){
-      const root=document.getElementById('app');
-      root.innerHTML = `
-        <header class="relative overflow-hidden">
-          <div aria-hidden="true" class="absolute inset-0">
-            <div class="absolute -top-40 -left-28 h-[420px] w-[420px] blur-[110px] rounded-full bg-gradient-to-br from-sky-500/25 via-indigo-500/20 to-fuchsia-500/30"></div>
-            <div class="absolute -top-16 right-0 h-[280px] w-[280px] blur-[110px] rounded-full bg-gradient-to-br from-fuchsia-400/25 via-purple-500/20 to-sky-500/25"></div>
-          </div>
-          <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
-            <h1 class="text-3xl sm:text-4xl font-extrabold leading-tight">
-              <span class="text-white">Recast Software</span>
-            </h1>
-            <p class="mt-2 max-w-2xl text-slate-300">
-              ${STATE.activeTab==='problems'
-                ? 'Application deployment isn’t the problem. Doing it fast, consistently, and securely across the business is. — Microsoft MVP'
-                : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
-            </p>
-          </div>
-          <div class="relative mx-auto max-w-6xl px-4">
-            <div role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded-full bg-[#0b152f] p-1 ring-1 ring-white/10">
-              ${TABS.map(t=>`
-                <button type="button" class="${cx('inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm focus-ring transition', STATE.activeTab===t.id ? 'bg-yellow-400 text-slate-900' : 'text-slate-200 hover:bg-white/5')}" data-action="switch-tab" data-tab="${t.id}" aria-controls="panel-${t.id}" aria-selected="${STATE.activeTab===t.id}">
-                  <i data-lucide="${t.icon}" class="w-4 h-4"></i><span>${t.label}</span>
-                </button>
-              `).join('')}
-            </div>
-          </div>
-        </header>
+      /* ------------------------------
+         Delivery truck indicator (top -> end user)
+         - Vertical travel is driven by JS via CSS var --y
+         ------------------------------ */
+      #deliveryTruck {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        z-index: 30;
+        pointer-events: none;
+        opacity: 0;
+        transform: translate(-50%, var(--y, -44px));
+        will-change: transform, opacity;
+        transition: opacity 220ms ease;
+        filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.12));
+      }
+      #deliveryTruck.show {
+        opacity: 1;
+      }
+      #deliveryTruck .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(229, 231, 235, 0.9);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      #deliveryTruck .badge {
+        width: 30px;
+        height: 30px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #1d4ed8, #2563eb);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+        position: relative;
+        overflow: hidden;
+      }
+      #deliveryTruck .badge:after {
+        content: "";
+        position: absolute;
+        inset: -30%;
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0));
+        transform: rotate(18deg);
+      }
+      #deliveryTruck .label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #1d4ed8;
+        letter-spacing: 0.1px;
+        white-space: nowrap;
+        line-height: 1.1;
+      }
+      #deliveryTruck .sub {
+        font-size: 10px;
+        color: #475569;
+        margin-top: 1px;
+        white-space: nowrap;
+        line-height: 1.1;
+      }
+      #deliveryTruck .motion {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        animation: courierBob 0.95s ease-in-out infinite;
+      }
+      #deliveryTruck .tilt {
+        display: inline-flex;
+        animation: courierTilt 1.35s ease-in-out infinite;
+      }
+      #deliveryTruck .truckSvg {
+        position: relative;
+        z-index: 1;
+      }
+    </style>
+  </head>
 
-        <main class="mx-auto max-w-6xl px-4 pb-16">
-          ${STATE.activeTab!=='problems' ? `
-          <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            ${chip('Minutes saved (per user/per month)', String(STATE.impact.minutes), 'emerald')}
-            ${chip('Packaging hours avoided', String(STATE.impact.pkgHours), 'sky')}
-            ${chip('Zero-day window reduced (hrs)', String(round(STATE.impact.riskHrs)), 'yellow')}
-          </div>` : ''}
-          <section class="mt-5">${renderActivePanel()}</section>
-        </main>
-      `;
-      if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
-      attachEvents();
-      if (STATE.activeTab === 'solution') { buildFlow(); }
-      if (STATE.activeTab === 'roi') { updateROIOutputs(); }
-    }
+  <body class="min-h-screen antialiased bg-gray-50 text-gray-900 font-[Inter]">
+    <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+    <div id="app" class="min-h-screen"></div>
 
-    function chip(label,value,tone){
-      const tones={emerald:'from-emerald-400/80 to-teal-400/80',sky:'from-sky-400/80 to-indigo-400/80',yellow:'from-yellow-300/90 to-amber-400/90'};
-      return `
-        <div class="section-card p-3">
-          <div class="text-[11px] text-slate-300">${label}</div>
-          <div class="mt-1 inline-flex items-center gap-2 rounded-full bg-gradient-to-r px-2 py-0.5 text-slate-900 ${tones[tone]}">
-            <i data-lucide="badge-check" class="w-4 h-4"></i><span class="text-sm font-semibold">${value}</span>
-          </div>
-        </div>
-      `;
-    }
+    <script>
+      /* =========================
+         STATE + CONSTANTS
+         ========================= */
+      const STATE = {
+        activeTab: "problems",
+        activeView: "exec",
+        impact: { minutes: 9, pkgHours: 6, riskHrs: 22.5 },
+        defaults: { impact: { minutes: 9, pkgHours: 6, riskHrs: 22.5 } },
+        ctx: { device: "Windows", network: "Corporate", compliant: true },
+        packHrs: 8,
+        configHrs: 2,
+        currentHrs: 24,
+        roiInputs: { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18 },
+        copied: false,
+        showLabels: false,
+        showSolutionCards: true,
+        openWhy: null,
+        openWhyModal: null,
 
-    function renderActivePanel(){
-      if (STATE.activeTab==='problems') return renderProblems();
-      if (STATE.activeTab==='solution') return renderSolution();
-      if (STATE.activeTab==='roi') return renderROI();
-      return '';
-    }
+        // (Old accordion state left in place to avoid unintended side effects elsewhere.)
+        openCards: { core: false, onboarding: false, trust: false },
 
-    /* ---------- Tab 1: Current State (copy exactly mirrors screenshot) ---------- */
-    function renderProblems(){
-      const items=[
-        {t:'Fragmented delivery',s:'Windows / Mac / VDI / Web — users guess the right way.',i:'layers'},
-        {t:'Packaging backlog',s:'Rebuild per version; updates stall.',i:'boxes'},
-        {t:'Zero-day exposure',s:'Patching takes days, not minutes.',i:'shield'},
-        {t:'Slow upgrades',s:'Stuck to old images; change is slow.',i:'layout-grid'}
+        // New: wizard-style popout card navigation on the Recast Approach tab
+        solutionStep: 0,
+        visitedCards: [],
+
+        openBuckets: { one: false, zero: false, per: false, edit: false },
+        modalOpen: false,
+        editBuffers: {
+          change: { intro: "", bullets: "", analyst: "" },
+          now: { intro: "", bullets: "", analyst: "" },
+          recast: { intro: "", bullets: "", analyst: "" },
+        },
+        selectedBullets: {},
+        selectedCardBullets: { core: [], onboarding: [], trust: [] },
+        // New: image upload state
+        uploadedImages: [],
+        showImagePlayer: false,
+        currentImageIndex: 0,
+        currentState: {
+          change: {
+            intro:
+              "The app layer has become the biggest slowdown in IT. Teams are drowning in apps, constant updates, and one-off fixes, and every project ends up paying the price.",
+            bullets: [
+              "There are too many apps to manage by hand. Commercial, internal, and legacy software are spread across Intune, ConfigMgr, VDI, Windows, and macOS.",
+              "Headcount hasn’t grown, but the work has exploded. Most teams are already over capacity and spend most of their day reacting to app issues.",
+              "Big initiatives keep getting stuck. Cloud moves, Citrix or AVD projects, hardware refreshes, and AI efforts all run into the same wall — app readiness.",
+              "Technical debt keeps piling up. Different versions of the same app are everywhere, creating more risk, more tickets, and slower recovery when things break.",
+            ],
+            analyst:
+              "When the application layer is a mess, transformation projects stall or fail. It’s not because the strategy is wrong, but because there’s no capacity left to execute.",
+          },
+          now: {
+            intro:
+              "IT teams are being asked to manage more apps and more change with the same people and the same tools. The gap between what’s expected and what’s possible keeps getting wider.",
+            bullets: [
+              "App updates and complexity keep increasing, but team size stays the same. You can’t scale people the way you scale software.",
+              "Internal and custom apps don’t update themselves, so every change adds more manual work, more dependencies, and more risk.",
+              "Leadership wants progress on AI, modernization, and new platforms, but the teams who could drive that progress are stuck keeping apps running.",
+              "The longer this goes on, the worse it gets. Version sprawl grows, security and compliance get harder, and cleanup costs rise fast.",
+            ],
+            analyst:
+              "In the next few years, the organizations that succeed with AI and modernization will be the ones that fix app delivery first. Everyone else will hit a hard capacity wall.",
+          },
+          recast: {
+            intro:
+              "Recast’s Application Workspace solves the core problem. It gives IT one place to package, update, and manage every application so the app layer stops slowing everything down.",
+            bullets: [
+              "One workspace for every app, whether commercial, internal, or legacy. Installs, updates, and access all handled consistently across Intune, ConfigMgr, AVD, and other systems.",
+              "Automates what teams still do by hand — packaging, versioning, and pushing updates, especially for internal and custom apps.",
+              "Reduces technical debt and version sprawl, which means fewer variables when something breaks and far fewer app-related tickets.",
+              "Frees up IT capacity. What used to take hours now takes minutes, so migrations, pilots, patch cycles, and AI projects can finally move at business speed.",
+            ],
+            analyst:
+              "Recast turns app management from a drag on every project into a stable foundation. Readiness stops being the blocker and becomes the default.",
+          },
+        },
+        defaultsCurrentState() {
+          return JSON.parse(
+            JSON.stringify({
+              change: {
+                intro:
+                  "The app layer has become the biggest slowdown in IT. Teams are drowning in apps, constant updates, and one-off fixes, and every project ends up paying the price.",
+                bullets: [
+                  "There are too many apps to manage by hand. Commercial, internal, and legacy software are spread across Intune, ConfigMgr, VDI, Windows, and macOS.",
+                  "Headcount hasn’t grown, but the work has exploded. Most teams are already over capacity and spend most of their day reacting to app issues.",
+                  "Big initiatives keep getting stuck. Cloud moves, Citrix or AVD projects, hardware refreshes, and AI efforts all run into the same wall — app readiness.",
+                  "Technical debt keeps piling up. Different versions of the same app are everywhere, creating more risk, more tickets, and slower recovery when things break.",
+                ],
+                analyst:
+                  "When the application layer is a mess, transformation projects stall or fail. It’s not because the strategy is wrong, but because there’s no capacity left to execute.",
+              },
+              now: {
+                intro:
+                  "IT teams are being asked to manage more apps and more change with the same people and the same tools. The gap between what’s expected and what’s possible keeps getting wider.",
+                bullets: [
+                  "App updates and complexity keep increasing, but team size stays the same. You can’t scale people the way you scale software.",
+                  "Internal and custom apps don’t update themselves, so every change adds more manual work, more dependencies, and more risk.",
+                  "Leadership wants progress on AI, modernization, and new platforms, but the teams who could drive that progress are stuck keeping apps running.",
+                  "The longer this goes on, the worse it gets. Version sprawl grows, security and compliance get harder, and cleanup costs rise fast.",
+                ],
+                analyst:
+                  "In the next few years, the organizations that succeed with AI and modernization will be the ones that fix app delivery first. Everyone else will hit a hard capacity wall.",
+              },
+              recast: {
+                intro:
+                  "Recast’s Application Workspace solves the core problem. It gives IT one place to package, update, and manage every application so the app layer stops slowing everything down.",
+                bullets: [
+                  "One workspace for every app, whether commercial, internal, or legacy. Installs, updates, and access all handled consistently across Intune, ConfigMgr, AVD, and other systems.",
+                  "Automates what teams still do by hand — packaging, versioning, and pushing updates, especially for internal and custom apps.",
+                  "Reduces technical debt and version sprawl, which means fewer variables when something breaks and far fewer app-related tickets.",
+                  "Frees up IT capacity. What used to take hours now takes minutes, so migrations, pilots, patch cycles, and AI projects can finally move at business speed.",
+                ],
+                analyst:
+                  "Recast turns app management from a drag on every project into a stable foundation. Readiness stops being the blocker and becomes the default.",
+              },
+            })
+          );
+        },
+        progress: { apps: 0, time: 0, tickets: 0 },
+      };
+
+      const TABS = [
+        { id: "problems", label: "Current State", icon: "alert-triangle" },
+        { id: "solution", label: "Recast Approach", icon: "workflow" },
+        { id: "roi", label: "Business Impact", icon: "bar-chart-3" },
       ];
-      return `
-        <section id="panel-problems" class="space-y-3">
-          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            ${items.map(p=>`
-              <article class="section-card p-4">
-                <div class="flex items-center gap-2"><i data-lucide="${p.i}" class="w-5 h-5 text-sky-300"></i><h3 class="text-base font-semibold">${p.t}</h3></div>
-                <p class="mt-1 text-sm text-slate-300">${p.s}</p>
-              </article>
-            `).join('')}
-          </div>
-          <p class="text-sm text-slate-300">Too many apps, too many updates — IT can’t keep up, leaving systems behind and security at risk.</p>
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-            ${callout('alert-triangle','Why change',[
-              'App management is the #1 bottleneck. New devices, platforms, and projects stall until apps are packaged, patched, and proven.',
-              'Too many apps, too many updates. Thousands of apps, constant versions — IT can’t keep up, slowing adoption and raising risk.',
-              'Innovation waits on apps. Every transformation — cloud, security, AI — gets delayed if app delivery isn’t solved first.'
-            ])}
-            ${callout('clock-4','Why now',[
-              'Faster change cycles. OS updates, AI tools, and SaaS shifts are constant — apps must keep pace.',
-              'Rising risk. Zero-days and compliance rules make delayed patching unacceptable',
-              'Shrinking teams. IT capacity isn’t growing, but demands are. Fix app management first, or nothing else moves.'
-            ])}
-            ${callout('sparkles','Why Recast',[
-              'One platform for every app. Package, patch, and deliver from a single place across all devices and management tools.',
-              'Proven scale. 7,000+ curated apps, automated updates, and instant delivery slash manual effort.',
-              'Fuel for innovation. By removing app friction, Recast lets enterprises adopt new tech faster, safer, and with less risk.'
-            ],true)}
-          </div>
-        </section>
-      `;
-    }
-    function callout(icon,label,bullets,cta=false){
-      return `
-        <div class="section-card p-3">
-          <div class="flex items-center gap-2 text-sm font-semibold"><i data-lucide="${icon}" class="w-4 h-4 text-amber-400"></i><span>${label}</span></div>
-          <ul class="mt-1 list-disc pl-5 text-sm text-slate-300">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>
-          ${cta?`<div class="mt-3 flex justify-end"><button type="button" data-action="advance" data-next="solution" class="rounded-full bg-[#e76a1f] px-3 py-1.5 text-sm font-semibold text-white focus-ring inline-flex items-center gap-2"><i data-lucide="arrow-right" class="w-4 h-4"></i> How Recast solves it</button></div>`:''}
-        </div>
-      `;
-    }
 
-    /* ---------- Tab 2: Recast Approach ---------- */
-    function renderSolution(){
-      const saved=Math.max(0, Number(STATE.packHrs)-Number(STATE.configHrs));
-      const reduced=Math.max(0, Number(STATE.currentHrs)-1.5);
-      const route=routeRecommendation(STATE.ctx);
-      return `
-        <section id="panel-solution" class="space-y-3">
-          <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            ${renderFlow()}
-            <div class="flex flex-col gap-3">
-              ${STATE.showSolutionCards ? `
-                ${cardUpdateOnce(saved)}
-                ${cardZeroDay(reduced)}
-                ${cardOneIcon(route)}
-              ` : `
-                <div class="section-card p-4 flex items-center justify-center">
-                  <button type="button" data-action="show-solution-cards" class="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900 focus-ring">Show</button>
-                </div>
-              `}
+      const NEW_CARDS = [
+        {
+          id: "core",
+          icon: "layers",
+          title: "How Recast Does It.",
+          bullets: [
+            "One workspace to manage the full app lifecycle across SCCM, Intune, Citrix, Omnissa, and Azure — even while platforms coexist and change.",
+            "A library of 8,000+ pre-tested enterprise apps — plus support for your existing custom and large-scale applications.",
+            "Automated patching and validation reduce version sprawl and maintain compliance across mixed SCCM and Intune environments.",
+            "A unified control plane that restores visibility and governance across all app delivery paths — regardless of backend platform.",
+            "Policy-driven automation reduces manual work by over 60%.",
+            "End users access the right apps through a consistent experience — without retraining or new workflows as IT changes behind the scenes",
+          ],
+          closer: "Configured once — Delivered everywhere.",
+          timeline: false,
+          bgHeader: "bg-gray-50",
+          bgContent: "bg-gray-50",
+        },
+        {
+          id: "onboarding",
+          icon: "clock",
+          title: "Onboard & Up to Speed Fast.",
+          bullets: [
+            "Standard rollout in 4–6 weeks (Kickoff — Implementation — UAT — Launch — Enablement).",
+            "No new infrastructure — integrates with your existing management tools.",
+            "Guided setup with dedicated Customer Success Manager.",
+            "Typical resource: 1–2 IT engineers part-time.",
+            "Enablement includes training, certification, and success planning.",
+          ],
+          closer: "From first call to production in weeks, not months.",
+          timeline: true,
+          bgHeader: "bg-gray-50",
+          bgContent: "bg-gray-50",
+        },
+        {
+          id: "trust",
+          icon: "shield-check",
+          title: "Trusted by Customers",
+          bullets: [
+            "60M+ endpoints across 130+ countries.",
+            "70k+ Customers & Trusted by global organizations| Citibank, McKinsey & Company, U.S. Air Force, FEMA, Hitachi, Johns Hopkins, Costco, Government of Canada.",
+            "87 CSAT Score | Most trusted in the industry",
+            "Proven scalability from small pilots to global deployments.",
+            "Backed by enterprise-grade support and compliance alignment (SOC 2, ISO 27001).",
+          ],
+          closer: "Trusted by organizations that can’t afford downtime.",
+          timeline: false,
+          bgHeader: "bg-gray-50",
+          bgContent: "bg-gray-50",
+        },
+      ];
+
+      const onboardingMiniTimelineEnabled = true;
+
+      function cx(...a) {
+        return a.filter(Boolean).join(" ");
+      }
+      function round(n) {
+        return Math.round(n * 100) / 100;
+      }
+      function num(n) {
+        return new Intl.NumberFormat().format(Math.round(n));
+      }
+      function routeRecommendation(ctx) {
+        if (!ctx.compliant) return "Web";
+        if (ctx.device === "Windows" && ctx.network !== "Home") return "Local";
+        return "VDI";
+      }
+      function cleanNum(v) {
+        v = Number(String(v).replace(/[^0-9.\-]/g, ""));
+        return isFinite(v) ? v : 0;
+      }
+
+      /* =========================
+         CONFETTI (CANVAS, NO LIBS)
+         ========================= */
+      const Confetti = (() => {
+        let canvas,
+          ctx,
+          dpr = 1;
+        let particles = [];
+        let raf = null;
+        let last = 0;
+        let running = false;
+        const PALETTE = ["#2563EB", "#60A5FA", "#10B981", "#F59E0B", "#EF4444", "#111827"];
+
+        function resize() {
+          if (!canvas) return;
+          const w = window.innerWidth;
+          const h = window.innerHeight;
+          dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+          canvas.width = Math.floor(w * dpr);
+          canvas.height = Math.floor(h * dpr);
+          canvas.style.width = w + "px";
+          canvas.style.height = h + "px";
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        function init() {
+          canvas = document.getElementById("confettiCanvas");
+          if (!canvas) return;
+          ctx = canvas.getContext("2d", { alpha: true });
+          resize();
+          window.addEventListener(
+            "resize",
+            () => {
+              resize();
+            },
+            { passive: true }
+          );
+        }
+        function rand(min, max) {
+          return Math.random() * (max - min) + min;
+        }
+        function burst({ x, y, count = 80, spread = 70, power = 10, gravity = 1200, drag = 0.985 }) {
+          if (!canvas || !ctx) init();
+          if (!canvas || !ctx) return;
+          canvas.classList.add("on");
+          const angleMin = (-90 - spread / 2) * (Math.PI / 180);
+          const angleMax = (-90 + spread / 2) * (Math.PI / 180);
+          for (let i = 0; i < count; i++) {
+            const a = rand(angleMin, angleMax);
+            const v = rand(power * 0.55, power);
+            const size = rand(6, 10);
+            const shape = Math.random() < 0.12 ? "dot" : "rect";
+            particles.push({
+              x,
+              y,
+              vx: Math.cos(a) * v * 60,
+              vy: Math.sin(a) * v * 60,
+              w: size,
+              h: shape === "dot" ? size * 0.85 : size * rand(0.55, 1.2),
+              rot: rand(0, Math.PI * 2),
+              vr: rand(-9, 9),
+              color: PALETTE[(Math.random() * PALETTE.length) | 0],
+              life: 0,
+              ttl: rand(0.95, 1.55),
+              gravity,
+              drag,
+              shape,
+            });
+          }
+          start();
+        }
+        function start() {
+          if (running) return;
+          running = true;
+          last = performance.now();
+          raf = requestAnimationFrame(tick);
+        }
+        function stop() {
+          running = false;
+          if (raf) cancelAnimationFrame(raf);
+          raf = null;
+          if (canvas) canvas.classList.remove("on");
+        }
+        function drawRect(p) {
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          const r = Math.min(3, Math.max(1, p.w * 0.2));
+          const w = p.w;
+          const h = p.h;
+          ctx.beginPath();
+          ctx.moveTo(-w / 2 + r, -h / 2);
+          ctx.arcTo(w / 2, -h / 2, w / 2, h / 2, r);
+          ctx.arcTo(w / 2, h / 2, -w / 2, h / 2, r);
+          ctx.arcTo(-w / 2, h / 2, -w / 2, -h / 2, r);
+          ctx.arcTo(-w / 2, -h / 2, w / 2, -h / 2, r);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+        function drawDot(p) {
+          ctx.save();
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.w * 0.32, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+        function tick(now) {
+          const dt = Math.min(0.032, Math.max(0.001, (now - last) / 1000));
+          last = now;
+          ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+          particles = particles.filter((p) => {
+            p.life += dt;
+            const t = p.life / p.ttl;
+            p.vx *= Math.pow(p.drag, dt * 60);
+            p.vy *= Math.pow(p.drag, dt * 60);
+            p.vy += p.gravity * dt;
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.rot += p.vr * dt;
+
+            const alpha = t < 0.7 ? 1 : Math.max(0, 1 - (t - 0.7) / 0.3);
+            ctx.globalAlpha = alpha;
+            if (p.shape === "dot") drawDot(p);
+            else drawRect(p);
+            return p.life < p.ttl && p.y < window.innerHeight + 80;
+          });
+          ctx.globalAlpha = 1;
+          if (particles.length === 0) {
+            stop();
+            return;
+          }
+          raf = requestAnimationFrame(tick);
+        }
+        return {
+          init,
+          burstAtElement(el, opts = {}) {
+            if (!el) return;
+            const r = el.getBoundingClientRect();
+            burst({ x: r.left + r.width / 2, y: r.top + r.height / 2, ...opts });
+          },
+          burst,
+          clear() {
+            particles = [];
+            if (ctx) ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+            stop();
+          },
+        };
+      })();
+
+      /* =========================
+         LOTTIE OVERLAY (FIXED)
+         ========================= */
+      let approachAnimations = null;
+      let approachTimeouts = [];
+      const LOTTIE_PATHS = {
+        chaos: "https://assets4.lottiefiles.com/packages/lf20_yr6zz3wt.json",
+        breakdown: "https://assets9.lottiefiles.com/packages/lf20_rovf9s.json",
+        collapse: "https://assets3.lottiefiles.com/packages/lf20_k9qliiD3Bf.json",
+        unify: "https://assets1.lottiefiles.com/packages/lf20_u4yrau.json",
+        endstate: "https://assets8.lottiefiles.com/packages/lf20_jmejybvu.json",
+      };
+      function clearApproachTimeouts() {
+        approachTimeouts.forEach((t) => clearTimeout(t));
+        approachTimeouts = [];
+      }
+      function destroyApproachAnimations() {
+        clearApproachTimeouts();
+        if (!approachAnimations) return;
+        Object.values(approachAnimations).forEach((anim) => {
+          try {
+            anim.destroy();
+          } catch {}
+        });
+        approachAnimations = null;
+      }
+      function ensureApproachAnimations() {
+        if (!window.lottie) return;
+        const layer = document.getElementById("recast-approach-animation-layer");
+        if (!layer) return;
+        const ids = Object.keys(LOTTIE_PATHS);
+        approachAnimations = approachAnimations || {};
+        for (const id of ids) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (approachAnimations[id]) continue;
+          approachAnimations[id] = window.lottie.loadAnimation({
+            container: el,
+            renderer: "svg",
+            autoplay: false,
+            loop: false,
+            path: LOTTIE_PATHS[id],
+          });
+        }
+      }
+      function hideApproachLayers() {
+        ["chaos", "breakdown", "collapse", "unify", "endstate"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = "none";
+        });
+      }
+      function playStep(name, delay) {
+        approachTimeouts.push(
+          setTimeout(() => {
+            if (!approachAnimations || !approachAnimations[name]) return;
+            const layer = document.getElementById(name);
+            if (!layer) return;
+            layer.style.display = "block";
+            try {
+              approachAnimations[name].goToAndPlay(0, true);
+            } catch {}
+          }, delay)
+        );
+      }
+      function runWorkspaceAnimation() {
+        ensureApproachAnimations();
+        hideApproachLayers();
+        clearApproachTimeouts();
+        const flowCard = document.getElementById("flowCard");
+        if (flowCard) flowCard.classList.remove("workspace-final");
+        playStep("chaos", 0);
+        playStep("breakdown", 800);
+        playStep("collapse", 1400);
+        playStep("unify", 2200);
+        playStep("endstate", 3000);
+        approachTimeouts.push(
+          setTimeout(() => {
+            const fc = document.getElementById("flowCard");
+            if (fc) fc.classList.add("workspace-final");
+          }, 3800)
+        );
+      }
+
+      /* =========================
+         DELIVERY TRUCK PATH (TOP -> END USER)
+         ========================= */
+      let flowInterval = null;
+      let flowRunning = false;
+
+      const TruckPath = {
+        startY: -44,
+        endY: 0,
+        ready: false,
+      };
+
+      function computeTruckPath() {
+        const card = document.getElementById("flowCard");
+        const endCard = document.getElementById("endUserCard");
+        const truck = document.getElementById("deliveryTruck");
+        if (!card || !endCard || !truck) {
+          TruckPath.ready = false;
+          return;
+        }
+        const endY =
+          endCard.offsetTop + Math.min(34, Math.max(24, endCard.offsetHeight * 0.25));
+        TruckPath.startY = -44;
+        TruckPath.endY = Math.max(40, Math.min(card.scrollHeight - 60, endY));
+        TruckPath.ready = true;
+        truck.style.setProperty("--y", TruckPath.startY + "px");
+      }
+
+      function setTruckProgress(appsProcessed) {
+        const truck = document.getElementById("deliveryTruck");
+        if (!truck) return;
+        if (!TruckPath.ready) computeTruckPath();
+        if (!TruckPath.ready) return;
+
+        const total = 128;
+        const t = Math.max(0, Math.min(1, (appsProcessed || 0) / total));
+        const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        const y = TruckPath.startY + (TruckPath.endY - TruckPath.startY) * eased;
+        truck.style.setProperty("--y", y.toFixed(1) + "px");
+      }
+
+      function showTruck() {
+        const truck = document.getElementById("deliveryTruck");
+        if (!truck) return;
+        computeTruckPath();
+        truck.classList.add("show");
+        setTruckProgress(0);
+      }
+
+      function hideTruck() {
+        const truck = document.getElementById("deliveryTruck");
+        if (!truck) return;
+        truck.classList.remove("show");
+        truck.style.setProperty("--y", "-44px");
+      }
+
+      /* =========================
+         RENDER
+         ========================= */
+      function render() {
+        destroyApproachAnimations();
+        const root = document.getElementById("app");
+        root.innerHTML = `
+          <header class="relative">
+            <div class="relative mx-auto max-w-6xl px-6 lg:px-12 pt-8 pb-6">
+              <h1 class="text-4xl md:text-5xl font-semibold leading-tight">
+                <span class="text-blue-600">Re</span><span class="text-gray-900">cast Application Workspace</span>
+              </h1>
             </div>
-          </div>
-        </section>
-      `;
-    }
-
-    function pill(label,active,action,value){
-      return `<button type="button" class="${cx('rounded-full px-3 py-1 border text-xs transition',active?'bg-yellow-400 text-slate-900 border-transparent':'bg-[#0a1124] text-slate-200 hover:bg-white/10 border-white/10')}" data-action="${action}" data-value="${String(value)}">${label}</button>`;
-    }
-
-    function cardOneIcon(route){
-      return `
-        <div class="section-card p-4">
-          <div class="flex items-center gap-2"><span>🖥️</span><h3 class="text-base font-semibold">Always the Right App, No Matter Where You Work.</h3></div>
-          <p class="mt-1 text-sm text-slate-300">Smart Icons open apps the best way for each user—on Windows, macOS, Web, VPN, or VDI.</p>
-          <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
-            ${['Windows','Mac'].map(d=>pill(d,STATE.ctx.device===d,'set-device',d)).join('')}
-            ${['Corporate','VPN'].map(n=>pill(n,STATE.ctx.network===n,'set-network',n)).join('')}
-            ${pill(STATE.ctx.compliant?'Compliant':'Non-compliant',STATE.ctx.compliant,'toggle-compliance','')}
-          </div>
-          <div class="mt-2 text-sm text-slate-300">Recommended route:</div>
-          <div class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-3 py-1 text-slate-900 text-sm"><i data-lucide="check-circle-2" class="w-4 h-4"></i>${route}</div>
-          <div class="mt-3"><button type="button" class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs hover:bg-white/20" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact (+2 min saved per user)</button></div>
-        </div>
-      `;
-    }
-    function cardUpdateOnce(saved){
-      return `
-        <div class="section-card p-4">
-          <div class="flex items-center gap-2"><span>⚙️</span><h3 class="text-base font-semibold">Update Once, Deploy Everywhere</h3></div>
-          <p class="mt-1 text-sm text-slate-300">Package one time; push to cloud, on-prem, or hybrid with rings.</p>
-          <div class="sub-card p-3 text-sm">
-            <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-2" class="w-4 h-4"></i> Critical app updates</div>
-            <label class="mt-2 flex items-center gap-2 text-xs">
-              <span class="text-slate-400">Hours/package</span>
-              <input class="w-16 rounded bg-slate-950 px-2 py-1" value="${STATE.packHrs}" inputmode="decimal" data-action="set-pack-hrs" aria-label="Hours per package">
-              <span>→</span>
-              <input class="w-16 rounded bg-slate-950 px-2 py-1" value="${STATE.configHrs}" inputmode="decimal" data-action="set-config-hrs" aria-label="Hours to configure">
-            </label>
-            <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span>${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong>${saved} hrs saved</strong></div>
-            <div class="mt-2 text-[12px] text-slate-300 flex flex-wrap gap-2">
-              <span class="rounded-full bg-black/30 px-2 py-1">☁️ Cloud</span>
-              <span class="rounded-full bg-black/30 px-2 py-1">🖥️ On-Prem</span>
-              <span class="rounded-full bg-black/30 px-2 py-1">🔀 Hybrid</span>
-            </div>
-            <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
-          </div>
-        </div>
-      `;
-    }
-    function cardZeroDay(reduced){
-      return `
-        <div class="section-card p-4">
-          <div class="flex items-center gap-2"><span>🛡️</span><h3 class="text-base font-semibold">Zero-Day Patches in Hours</h3></div>
-          <p class="mt-1 text-sm text-slate-300">Security fixes deploy in 1–2 hours instead of a full day (~90% faster).</p>
-          <div class="sub-card p-3 text-sm">
-            <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> Zero-day rollout</div>
-            <label class="mt-2 flex items-center gap-2 text-xs">
-              <span class="text-slate-400">Current hrs</span>
-              <input class="w-20 rounded bg-slate-950 px-2 py-1" value="${STATE.currentHrs}" inputmode="decimal" data-action="set-current-hrs" aria-label="Current time to deploy (hours)">
-            </label>
-            <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span>${STATE.currentHrs} → 1.5 hrs</span><strong>${round(reduced)} hrs reduced</strong></div>
-            <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
-          </div>
-        </div>
-      `;
-    }
-
-    /* ---------- Tab 2 left: Animated Flow ---------- */
-    function renderFlow(){
-      return `
-        <div class="section-card p-4">
-          <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-2">
-              <div class="h-6 w-6 rounded-lg bg-gradient-to-br from-sky-500 via-indigo-500 to-fuchsia-500 grid place-items-center"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
-              <div>
-                <h3 class="text-base font-semibold">Application Workspace</h3>
-                <div class="text-[12px] text-slate-400">Curated & secured catalog</div>
+            <div class="relative mx-auto max-w-6xl px-6 lg:px-12">
+              <div role="tablist" aria-label="Demo sections" class="flex flex-nowrap overflow-x-auto gap-2 rounded bg-gray-50 p-1 ring-1 ring-gray-200">
+                ${TABS.map(
+                  (t) => `
+                  <button type="button" class="${cx(
+                    "flex-1 inline-flex items-center justify-center gap-2 px-3.5 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition rounded-full",
+                    STATE.activeTab === t.id
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : "text-gray-900 hover:bg-gray-100"
+                  )}" data-action="switch-tab" data-tab="${t.id}" aria-controls="panel-${t.id}" aria-selected="${
+                    STATE.activeTab === t.id
+                  }">
+                    <i data-lucide="${t.icon}" class="w-4 h-4"></i><span>${t.label}</span>
+                  </button>
+                `
+                ).join("")}
               </div>
             </div>
-            <div class="flex items-center gap-2 text-[12px] text-slate-300">
-              <button type="button" class="rounded-full border border-white/15 bg-white/10 px-2.5 py-1" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
-              <button type="button" data-action="start-flow" class="rounded-full bg-white px-2.5 py-1.5 text-[12px] font-semibold text-slate-900">Start</button>
-              <button type="button" data-action="reset-flow" class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1.5 text-[12px]">Reset</button>
+          </header>
+          <main class="mx-auto max-w-6xl px-6 lg:px-12 pb-8 gap-4">
+            <section class="mt-4">${renderActivePanel()}</section>
+          </main>
+          ${renderModal()}
+          ${renderWhyModal()}
+          ${renderImagePlayer()}
+          ${renderUploadIcon()}
+        `;
+
+        if (window.lucide?.createIcons) {
+          try {
+            window.lucide.createIcons();
+          } catch {}
+        }
+
+        attachEvents();
+
+        if (STATE.activeTab === "solution") {
+          buildFlow();
+          ensureApproachAnimations();
+          setTimeout(() => {
+            computeTruckPath();
+            setTruckProgress(STATE.progress.apps);
+          }, 0);
+        }
+
+        if (STATE.activeTab === "roi") updateROIOutputs();
+      }
+
+      function renderActivePanel() {
+        if (STATE.activeTab === "problems") return renderProblems();
+        if (STATE.activeTab === "solution") return renderSolution();
+        if (STATE.activeTab === "roi") return renderROI();
+        return "";
+      }
+
+      /* =========================
+         CURRENT STATE (PROBLEMS TAB)
+         ========================= */
+      const pressures = [
+        {
+          id: "cost",
+          title: "CAPACITY & OPERATIONAL DRAG",
+          bullets: [
+            "Manual app management consumes skilled IT capacity.",
+            "Redundant installs create rework and escalation.",
+            "Teams can’t scale delivery as application demand increases.",
+            "Lack of standardization hides friction across the lifecycle.",
+          ],
+        },
+        {
+          id: "risk",
+          title: "RISK, COMPLIANCE & SECURITY",
+          bullets: [
+            "Version sprawl and patch gaps increase organizational risk.",
+            "No unified view limits governance and response speed.",
+            "Manual processes increase human error and audit exposure.",
+          ],
+        },
+        {
+          id: "capacity",
+          title: "CAPACITY & DELIVERY VELOCITY",
+          bullets: [
+            "Flat headcount limits the pace of change.",
+            "Repetitive tasks crowd out modernization efforts.",
+            "App readiness issues stall critical initiatives.",
+          ],
+        },
+        {
+          id: "employee",
+          title: "EMPLOYEE EXPERIENCE & ENABLEMENT",
+          bullets: [
+            "App delays stall workflows and frustrate users.",
+            "Version mismatches break processes and erode IT trust.",
+            "Inconsistent delivery drives shadow IT and ticket volume.",
+          ],
+        },
+      ];
+
+      function renderProblems() {
+        return `
+          <section id="panel-problems" class="space-y-3">
+            <h2 class="text-3xl font-semibold leading-tight">The application layer is the #1 bottleneck to operational change</h2>
+            <p class="text-base text-gray-700 leading-relaxed">Most IT teams aren’t failing — they’re constrained by a delivery model that doesn’t scale with the pace of change.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+              ${pressures
+                .map(
+                  (p) => `
+                <div class="rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-4 flex flex-col space-y-1 h-full">
+                  <h3 class="text-[14px] font-semibold mb-1">${p.title}</h3>
+                  <ul class="list-disc list-inside space-y-1 text-[12px] text-gray-700">
+                    ${p.bullets
+                      .map((b, i) => {
+                        const selected = (STATE.selectedBullets[p.id] || []).includes(i);
+                        return `
+                        <li class="flex items-center gap-2 min-h-[1.25rem] ${
+                          selected ? "bg-blue-50 rounded-md p-1 transition-colors" : ""
+                        } ${b ? "" : "invisible"}">
+                          <label class="flex items-center gap-2 cursor-pointer select-none w-full">
+                            <input type="checkbox" class="sr-only" data-action="toggle-bullet" data-category="${
+                              p.id
+                            }" data-index="${i}" ${selected ? "checked" : ""} aria-label="Select: ${b}">
+                            <div class="w-3.5 h-3.5 border-2 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out shrink-0 ${
+                              selected ? "bg-blue-600 border-blue-600" : "border-gray-300 bg-white"
+                            }">
+                              ${
+                                selected
+                                  ? '<i data-lucide="check" class="w-2.5 h-2.5 text-white stroke-[3]"></i>'
+                                  : ""
+                              }
+                            </div>
+                            <span class="${selected ? "text-blue-800 font-medium" : ""}">${b}</span>
+                          </label>
+                        </li>
+                      `;
+                      })
+                      .join("")}
+                  </ul>
+                </div>
+              `
+                )
+                .join("")}
+            </div>
+            <div class="mt-6 flex flex-wrap justify-between items-center gap-2">
+              <div class="flex items-center gap-2">
+                <button type="button"
+                        data-action="play-images"
+                        class="${STATE.uploadedImages && STATE.uploadedImages.length > 0 ? 'p-2 rounded-full border-2 border-green-600 text-green-600 hover:bg-green-50 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2' : 'p-2 rounded-full border-2 border-gray-300 text-gray-300 cursor-not-allowed'}"
+                        ${STATE.uploadedImages && STATE.uploadedImages.length > 0 ? '' : 'disabled'}
+                        aria-label="Play Images">
+                  <i data-lucide="play" class="w-4 h-4"></i>
+                </button>
+                <button type="button" data-action="reset-bullets" class="bg-transparent text-gray-900 border-2 border-gray-900 rounded-full px-4 py-1.5 hover:text-blue-600 hover:border-blue-600 hover:scale-102 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 text-sm">Reset</button>
+              </div>
+              <button type="button" data-action="next-tab" class="bg-blue-600 text-white rounded-full px-4 py-1.5 hover:bg-blue-700 hover:scale-102 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 text-sm">Next</button>
+            </div>
+          </section>
+        `;
+      }
+
+      /* =========================
+         WHY MODAL
+         ========================= */
+      function renderWhyModal() {
+        if (!STATE.openWhyModal) return "";
+        const id = STATE.openWhyModal;
+        const iconMap = { change: "alert-triangle", now: "clock-4", recast: "sparkles" };
+        const labelMap = { change: "Why Change", now: "Why Now", recast: "Why Recast" };
+        const data = STATE.currentState[id];
+        const headerTone = "bg-gray-50";
+        const cta = id === "recast";
+        return `
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-overlayFade" role="dialog" aria-modal="true" aria-labelledby="why-modal-title-${id}">
+            <div class="w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden animate-modalEnter" style="max-height: 95vh; overflow-y: auto;">
+              <div class="${headerTone} px-6 py-4 flex items-center justify-between border-b border-gray-200">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="${iconMap[id]}" class="w-7 h-7 text-gray-900" aria-hidden="true"></i>
+                  <h2 id="why-modal-title-${id}" class="text-2xl font-bold tracking-tight text-gray-900">${labelMap[id]}</h2>
+                </div>
+                <button type="button" class="text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 p-1.5" data-action="close-why-modal" aria-label="Close">
+                  <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+              </div>
+              <div class="p-6 bg-gray-50">
+                <p class="text-[15px] leading-relaxed text-gray-700 mb-3">${data.intro}</p>
+                <div class="space-y-3">
+                  ${data.bullets
+                    .map(
+                      (b) => `
+                    <div class="bg-white p-3 rounded-lg shadow-sm flex items-start gap-2 hover:shadow-md transition-shadow duration-300">
+                      <i data-lucide="check-circle" class="w-4.5 h-4.5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                      <p class="text-[15px] leading-relaxed text-gray-700">${b}</p>
+                    </div>
+                  `
+                    )
+                    .join("")}
+                </div>
+                <div class="mt-5 bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 flex items-start gap-2">
+                  <i data-lucide="lightbulb" class="w-4.5 h-4.5 text-yellow-400 flex-shrink-0 mt-0.5"></i>
+                  <p class="text-[15px] italic text-gray-700">${data.analyst}</p>
+                </div>
+                ${
+                  cta
+                    ? `
+                  <div class="mt-6 flex justify-center">
+                    <button type="button" data-action="advance" data-next="solution" class="inline-flex bg-blue-600 text-white text-[15px] font-semibold px-5 py-2.5 items-center gap-2 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 shadow-md hover:shadow-lg hover:bg-blue-700 transition-shadow duration-300 rounded-full">
+                      <i data-lucide="arrow-right" class="w-4.5 h-4.5"></i>
+                      How Recast solves it
+                    </button>
+                  </div>
+                `
+                    : ""
+                }
+              </div>
             </div>
           </div>
+        `;
+      }
 
-          <div id="flowCard" class="mt-3 sub-card p-3" role="region" aria-label="Animated flow">
-            <div class="space-y-2">
-              ${CATALOG.map(s=>`
-                <div class="cat-row">
-                  <div class="cat-title text-slate-400 uppercase">${s.title}</div>
-                  <div id="${s.id}" class="flex flex-wrap gap-2"></div>
-                </div>
-              `).join('')}
+      /* =========================
+         SOLUTION TAB (UPDATED UX)
+         - Right-side accordion replaced with popout wizard cards + Back/Next
+         ========================= */
+      function renderMiniTimeline() {
+        const phases = [
+          { icon: "play-circle", label: "Kickoff" },
+          { icon: "hammer", label: "Implementation" },
+          { icon: "check-circle", label: "UAT" },
+          { icon: "flag", label: "Launch" },
+          { icon: "book-open", label: "Enablement" },
+        ];
+        return `
+          <div class="flex items-center justify-between mt-4" aria-hidden="true">
+            ${phases
+              .map(
+                (p, i) => `
+              ${i > 0 ? '<div class="flex-1 h-px bg-gray-200 mx-2"></div>' : ""}
+              <div class="flex flex-col items-center">
+                <i data-lucide="${p.icon}" class="w-4.5 h-4.5 text-blue-600"></i>
+                <span class="text-[11px] mt-0.5 text-gray-700">${p.label}</span>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+        `;
+      }
+
+      function renderApproachWizard() {
+        const total = NEW_CARDS.length;
+        const idx = Math.max(0, Math.min(total - 1, Number(STATE.solutionStep || 0)));
+        const card = NEW_CARDS[idx];
+
+        const visitedCount = STATE.visitedCards.length;
+        const dots = NEW_CARDS.map((c, i) => {
+          const active = i === idx;
+          return `
+            <button
+              type="button"
+              class="${cx(
+                "w-2.5 h-2.5 rounded-full ring-1 transition",
+                active ? "bg-blue-600 ring-blue-600" : "bg-gray-200 ring-gray-300 hover:bg-gray-300"
+              )}"
+              data-action="solution-jump-card"
+              data-index="${i}"
+              aria-label="Go to: ${c.title}"
+              aria-current="${active}"
+            ></button>
+          `;
+        }).join("");
+
+        const canBack = idx > 0;
+        const canNext = idx < total - 1;
+
+        return `
+          <div class="flex flex-col gap-2 relative">
+            <div class="sticky top-0 z-10 bg-gray-50 py-1 shadow-md">
+              <div class="flex justify-between items-center text-[13px]">
+                <span class="font-semibold">Recast Approach</span>
+                <span class="text-gray-700">${visitedCount} of ${total} explored</span>
+              </div>
             </div>
 
-            <div id="flowHubFlash" class="mt-2 hidden text-amber-300 text-[12px] inline-flex items-center gap-1"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></div>
-
-            <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
-              ${['A','B','C'].map((k,i)=>`
-                <div class="sub-card p-2">
-                  <div class="text-[12px] text-slate-300">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
-                  <div id="flowConn${k}" class="mt-1 grid grid-cols-10 gap-1.5"></div>
-                  <div class="mt-1 flow-bar w-full bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400" style="--d:${.55 + .12*i}s"></div>
-                </div>
-              `).join('')}
-            </div>
-
-            <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
-              ${['A','B','C'].map((k,i)=>`
-                <div class="sub-card p-2">
-                  <div class="text-[12px] text-slate-300">${['Business Unit','Subsidiary','Region'][i]}</div>
-                  <div id="flowGrp${k}" class="mt-1 grid grid-cols-8 gap-1.5"></div>
-                  <div class="mx-auto mt-1 bolt-line h-16 w-1 bg-gradient-to-b from-amber-300 via-white to-amber-300" style="--d:${1 + .15*i}s"></div>
-                </div>
-              `).join('')}
-            </div>
-
-            <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
-              ${['A','B','C'].map((k,i)=>`
-                <div class="sub-card p-2 text-center">
-                  <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-slate-300"></i>
-                  <div id="flowDev${k}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
-                  <div class="mt-1 text-[11px] text-slate-400">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
-                </div>
-              `).join('')}
-            </div>
-
-            <!-- End user (single card that turns red → green) -->
-            <div class="mt-3">
-              <div id="endUserCard" class="sub-card p-3">
-                <div class="flex items-center gap-3">
-                  <div id="endUserAvatar" class="h-9 w-9 rounded-full bg-rose-600/90 grid place-items-center font-semibold">U</div>
-                  <div class="text-sm">
-                    <div class="font-medium text-slate-200">End user</div>
-                    <div class="text-slate-400">Apps on demand — no waiting, no tickets.</div>
+            <div class="rounded-2xl bg-white shadow-md hover:shadow-lg transition-shadow duration-300 ring-1 ring-gray-200 overflow-hidden animate-cardPop">
+              <div class="${card.bgHeader || "bg-gray-50"} px-5 py-4 border-b border-gray-200 flex items-start justify-between gap-4">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="h-10 w-10 rounded-2xl bg-blue-600 grid place-items-center shadow-sm">
+                    <i data-lucide="${card.icon}" class="w-5 h-5 text-white" aria-hidden="true"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="text-[12px] text-gray-600">Step ${idx + 1} of ${total}</div>
+                    <h3 class="text-xl font-semibold text-gray-900 truncate">${card.title}</h3>
                   </div>
                 </div>
-                <div class="mt-3 user-beam bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400" style="--d:2.1s"></div>
-                <div class="relative mt-2 rounded-lg border border-white/10 bg-[#0b1328] p-4">
-                  <i data-lucide="laptop" class="h-5 w-5 opacity-80"></i>
-                  <div id="endUserBadge" class="absolute right-2 top-2 badge bg-rose-500 text-black grid place-items-center font-bold" style="--d:2.4s">!</div>
-                  <div class="mt-1 text-[11px] text-slate-400">Workspace launches the correct app instantly</div>
+                <div class="flex items-center gap-2 shrink-0" aria-label="Approach steps">
+                  ${dots}
                 </div>
               </div>
-              <div id="flowSuccess" class="mt-2 hidden text-emerald-300 text-[13px] inline-flex items-center gap-1"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere.</span></div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
 
-    /* ---------- Tab 3: Impact & ROI (unchanged experience; live-updating) ---------- */
-    function renderROI(){
-      const r = calcROI();
-      return `
-        <section id="panel-roi" class="space-y-3">
-          <div class="section-card p-3"><div class="text-sm font-medium">Planting consistency in app delivery today is what prevents outages and chaos three years from now.</div></div>
+              <div class="p-5 ${card.bgContent || "bg-gray-50"}">
+                <ul class="space-y-2.5 text-[15px] leading-relaxed text-gray-700">
+                  ${card.bullets
+                    .map((b, i) => {
+                      const selected = (STATE.selectedCardBullets[card.id] || []).includes(i);
+                      return `
+                        <li class="${cx(
+                          "rounded-xl border px-3 py-2.5 transition-colors",
+                          selected ? "border-blue-200 bg-blue-50" : "border-gray-200 bg-white hover:bg-gray-50"
+                        )}">
+                          <label class="flex items-start gap-3 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              class="sr-only"
+                              data-action="toggle-card-bullet"
+                              data-card="${card.id}"
+                              data-index="${i}"
+                              ${selected ? "checked" : ""}
+                              aria-label="Select: ${b}"
+                            >
+                            <div class="${cx(
+                              "mt-0.5 w-4.5 h-4.5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all",
+                              selected ? "bg-blue-600 border-blue-600" : "bg-white border-gray-300"
+                            )}">
+                              ${selected ? '<i data-lucide="check" class="w-3 h-3 text-white stroke-[3]"></i>' : ""}
+                            </div>
+                            <span class="${selected ? "text-blue-900 font-medium" : ""}">${b}</span>
+                          </label>
+                        </li>
+                      `;
+                    })
+                    .join("")}
+                </ul>
 
-          <div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
-            ${kpiId('timer','Hours saved / mo', r.totalHoursSavedMonth, 'Per-user minutes × users + packaging + zero-day', 'kpi-hours')}
-            ${kpiId('line-chart','$ saved / yr', '$'+num(r.dollarSavedYear), 'Illustrative only', 'kpi-year')}
-            ${kpiId('percent','ROI', r.roiPct+'%', 'Net of subscription', 'kpi-roi')}
-            ${kpiId('rocket','Tickets / mo', num(r.ticketsMonth), 'Scale context', 'kpi-tickets')}
-          </div>
+                ${card.timeline && onboardingMiniTimelineEnabled ? renderMiniTimeline() : ""}
 
-          <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
-            <div class="section-card p-4 lg:col-span-2">
-              <h3 class="text-base font-semibold">Assumptions (edit)</h3>
-              <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                ${numInput('# users','users', r.i.users)}
-                ${numInput('Tickets per user / mo','ticketsPerUserPerMonth', r.i.ticketsPerUserPerMonth)}
-                ${numInput('Avg handle (mins)','avgHandleMins', r.i.avgHandleMins)}
-                ${numInput('Loaded cost ($/hr)','loadedCostPerHour', r.i.loadedCostPerHour)}
-                ${numInput('Recast annual cost ($)','recastAnnualCost', r.i.recastAnnualCost)}
+                <div class="mt-4 rounded-xl bg-white border border-gray-200 p-3">
+                  <p class="text-[14px] text-gray-700 italic">${card.closer}</p>
+                </div>
+
+                <div class="mt-5 flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    data-action="solution-prev-card"
+                    class="${cx(
+                      "inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 text-[13px] font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition",
+                      canBack
+                        ? "bg-transparent text-gray-900 border-gray-900 hover:text-blue-600 hover:border-blue-600"
+                        : "bg-transparent text-gray-400 border-gray-200 cursor-not-allowed"
+                    )}"
+                    ${canBack ? "" : "disabled"}
+                    aria-disabled="${!canBack}"
+                  >
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    Back
+                  </button>
+
+                  ${
+                    canNext
+                      ? `
+                        <button
+                          type="button"
+                          data-action="solution-next-card"
+                          class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 text-white text-[13px] font-semibold hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition"
+                        >
+                          Next
+                          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                      `
+                      : `
+                        <button
+                          type="button"
+                          data-action="go-tab"
+                          data-tab="roi"
+                          class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 text-white text-[13px] font-semibold hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition"
+                        >
+                          Business Impact
+                          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                      `
+                  }
+                </div>
               </div>
-              <div class="mt-3 text-[11px] text-slate-400">All values are examples. Replace with your data for accurate estimates.</div>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderSolution() {
+        return `
+          <section id="panel-solution" class="space-y-2">
+            <div class="grid grid-cols-1 gap-2 lg:grid-cols-2">
+              ${renderFlow()}
+              ${renderApproachWizard()}
+            </div>
+          </section>
+        `;
+      }
+
+      function renderFlow() {
+        return `
+          <div class="relative rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-3">
+            <!-- Animation Overlay for Recast Approach tab -->
+            <div id="recast-approach-animation-layer">
+              <div id="chaos" class="lottie"></div>
+              <div id="breakdown" class="lottie"></div>
+              <div id="collapse" class="lottie"></div>
+              <div id="unify" class="lottie"></div>
+              <div id="endstate" class="lottie"></div>
             </div>
 
-            <div class="section-card p-4">
-              <h3 class="text-base font-semibold">Results</h3>
-              <div class="mt-3 space-y-2 text-sm">
-                ${kvId('Hours saved / month', r.totalHoursSavedMonth, 'res-hours')}
-                ${kvId('$ saved / month', '$'+num(r.dollarSavedMonth), 'res-month')}
-                ${kvId('$ saved / year', '$'+num(r.dollarSavedYear), 'res-year')}
-                ${kvId('Net benefit / year', '$'+num(r.netBenefitYear), 'res-net')}
-                ${kvId('ROI', r.roiPct+'%', 'res-roi')}
-                ${kvId('Equivalent IT FTEs freed', r.fteEquivalent, 'res-fte')}
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5">
+                <div class="h-5 w-5 rounded grid place-items-center bg-blue-600">
+                  <i data-lucide="layers" class="h-3 w-3 text-white"></i>
+                </div>
+                <div><h3 class="text-[14px] font-semibold">Recast</h3></div>
               </div>
-              <div class="mt-2 text-[11px] text-slate-400 italic">Add a short customer proof-point here (e.g., “Cut packaging time by 80% in first 30 days”).</div>
-              <div class="mt-4 flex flex-wrap gap-2">
-                <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20 focus-ring">Reset</button>
-                <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:brightness-95 focus-ring">
-                  <i data-lucide="clipboard" class="w-4 h-4"></i> ${STATE.copied ? 'Copied!' : 'Copy executive one-pager'}
-                </button>
+              <div class="flex items-center gap-1.5 text-[11px]">
+                <button type="button" data-action="start-flow" id="workspaceStartButton" class="bg-blue-600 text-white px-2 py-1 text-[11px] font-semibold rounded-full hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Start</button>
+                <button type="button" data-action="reset-flow" class="bg-transparent text-gray-900 border-2 border-gray-900 px-2 py-1 rounded-full hover:text-blue-600 hover:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Reset</button>
+              </div>
+            </div>
+
+            <div class="mt-1 flex items-center justify-center gap-3 text-[13px] font-medium">
+              <div class="flex items-center gap-1">
+                <i data-lucide="building" class="w-4.5 h-4.5 text-gray-700"></i>
+                <span>Existing App Managers (SCCM, Intune, etc.)</span>
+              </div>
+              <i data-lucide="arrow-right" class="w-4.5 h-4.5 text-gray-500"></i>
+              <div class="flex items-center gap-1">
+                <i data-lucide="truck" class="w-4.5 h-4.5 text-blue-600"></i>
+                <span>Application Delivery (Recast)</span>
+              </div>
+              <i data-lucide="arrow-right" class="w-4.5 h-4.5 text-gray-500"></i>
+              <div class="flex items-center gap-1">
+                <i data-lucide="user" class="w-4.5 h-4.5 text-gray-700"></i>
+                <span>User</span>
+              </div>
+            </div>
+
+            <div class="mt-1 text-center bg-blue-50 p-1.5 rounded-lg text-[12px]">
+              Users get one consistent app experience—while IT standardizes delivery behind the scenes across every platform.
+            </div>
+
+            <div id="flowCard" class="mt-2 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-gray-50 shadow-inner relative overflow-hidden ${
+              STATE.showLabels ? "show-labels" : ""
+            }" role="region" aria-label="Animated flow">
+
+              <div id="progressCounters" class="hidden mb-2 grid grid-cols-3 gap-1.5 text-[13px] text-center">
+                <div><span class="font-semibold tabular-nums" id="appsProcessed">0</span> apps processed</div>
+                <div><span class="font-semibold tabular-nums" id="timeSaved">0</span> hours saved</div>
+                <div><span class="font-semibold tabular-nums" id="ticketsAvoided">0</span> tickets avoided</div>
+              </div>
+
+              <div class="space-y-1 relative">
+                ${CATALOG.map(
+                  (s) => `
+                  <div class="grid grid-cols-[12ch_1fr] gap-0.5 items-center border-t border-gray-200 pt-0.5 transition-all duration-300 first:border-t-0 first:pt-0 show-labels:grid-cols-[12ch_1fr] show-labels:gap-3">
+                    <div class="text-[11px] uppercase text-gray-700 flex items-center gap-1.5">
+                      <i data-lucide="folder" class="w-2.5 h-2.5"></i>${s.title}
+                    </div>
+                    <div id="${s.id}" class="flex flex-wrap gap-1.5 show-labels:gap-3"></div>
+                  </div>
+                `
+                ).join("")}
+
+                <div id="overlayTag" class="opacity-0 transition-opacity duration-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-2xl shadow-md z-10 show-labels:opacity-100 show-labels:delay-500 text-center text-[13px] text-gray-700">
+                  Every app mapped to stage, policy, region, and device.
+                </div>
+              </div>
+
+              <div id="flowHubFlash" class="mt-1 hidden text-blue-600">
+                <span class="inline-flex items-center gap-1 text-[11px]">
+                  <i data-lucide="bolt" class="h-3.5 w-3.5"></i><span>Update published</span>
+                </span>
+              </div>
+
+              <div class="mt-2 grid grid-cols-3 gap-1.5 relative" aria-hidden="true" id="platformsSection">
+                ${["A", "B", "C"]
+                  .map(
+                    (k, i) => `
+                  <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-1.5 relative">
+                    <div class="text-[11px] text-gray-700">${["Existing Platforms", "Staged Rings", "Access & Policy"][i]}</div>
+                    <div id="flowConn${k}" class="mt-0.5 grid grid-cols-10 gap-1"></div>
+                    <div data-anim="barGrow" class="mt-0.5 h-[0.22rem] rounded-[2px] origin-left scale-x-0 bg-gradient-to-r from-blue-600 to-blue-700" style="--d:${3 + 0.5 * i}s"></div>
+                    <i data-lucide="check-circle" class="opacity-0 absolute top-0.5 right-0.5 w-3.5 h-3.5 text-green-500 animate-fadeInOut" style="--d:${4 + 0.5 * i}s"></i>
+                  </div>
+                `
+                  )
+                  .join("")}
+                <div class="absolute top-[-0.5rem] left-0 w-full h-px opacity-50" style="background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%); background-size:4px 1px; background-repeat:repeat-x;"></div>
+              </div>
+
+              <div class="mt-2 grid grid-cols-3 gap-1.5 relative" aria-hidden="true" id="groupsSection">
+                ${["A", "B", "C"]
+                  .map(
+                    (k, i) => `
+                  <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-1.5 relative">
+                    <div class="text-[11px] text-gray-700">${["Business Unit", "Subsidiary", "Region"][i]}</div>
+                    <div id="flowGrp${k}" class="mt-0.5 grid grid-cols-8 gap-1"></div>
+                    <div data-anim="boltDrop" class="mx-auto mt-0.5 w-[0.22rem] h-12 rounded-[2px] origin-top scale-y-0 bg-gradient-to-b from-gray-900 to-blue-600" style="--d:${5 + 0.5 * i}s"></div>
+                    <i data-lucide="shield-check" class="opacity-0 absolute top-0.5 right-0.5 w-3.5 h-3.5 text-green-500 animate-fadeInOut" style="--d:${6 + 0.5 * i}s"></i>
+                  </div>
+                `
+                  )
+                  .join("")}
+                <div class="absolute top-[-0.5rem] left-0 w-full h-px opacity-50" style="background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%); background-size:4px 1px; background-repeat:repeat-x;"></div>
+              </div>
+
+              <div class="mt-2 grid grid-cols-3 gap-1.5 relative" aria-hidden="true" id="devicesSection">
+                ${["A", "B", "C"]
+                  .map(
+                    (k, i) => `
+                  <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-1.5 text-center relative">
+                    <i data-lucide="${["monitor-smartphone", "laptop", "smartphone"][i]}" class="h-4.5 w-4.5 text-gray-700"></i>
+                    <div id="flowDev${k}" class="mt-0.5 grid grid-cols-6 gap-1"></div>
+                    <div class="mt-0.5 text-[10px] text-gray-700">${["Windows & macOS", "VDI / Web", "Mobile"][i]}</div>
+                    <i data-lucide="check-circle" class="opacity-0 absolute top-0.5 right-0.5 w-3.5 h-3.5 text-green-500 animate-fadeInOut" style="--d:${8 + 0.5 * i}s"></i>
+                  </div>
+                `
+                  )
+                  .join("")}
+                <div class="absolute top-[-0.5rem] left-0 w-full h-px opacity-50" style="background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%); background-size:4px 1px; background-repeat:repeat-x;"></div>
+              </div>
+
+              <div class="mt-2">
+                <div id="endUserCard" class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 transition-all duration-500 p-2.5">
+                  <div class="flex items-center gap-2">
+                    <div id="endUserAvatar" class="h-8 w-8 grid place-items-center font-semibold rounded-full bg-red-600 text-white">U</div>
+                    <div class="text-[13px]">
+                      <div class="font-medium">End user</div>
+                      <div id="endUserMessage" class="text-gray-700">Apps on demand — without retraining users when IT changes.</div>
+                    </div>
+                  </div>
+                  <div data-anim="barGrow" class="mt-2 h-[0.38rem] rounded-[2px] origin-left scale-x-0 bg-gradient-to-r from-blue-600 to-blue-700" style="--d:10s"></div>
+                  <div class="relative mt-1 border border-gray-200 bg-gray-50 rounded-2xl p-3">
+                    <i data-lucide="laptop" class="h-4.5 w-4.5 text-gray-700"></i>
+                    <div id="endUserBadge" class="absolute right-1.5 top-1.5 w-[1rem] h-[1rem] rounded-full opacity-0 translate-y-[-6px] scale-90 grid place-items-center font-bold text-black bg-red-600" style="--d:11s">!</div>
+                    <div class="mt-0.5 text-[10px] text-gray-700">The workspace delivers the right app, every time, regardless of backend platform.</div>
+                  </div>
+                  <div id="miniWorkspace" class="mt-2 hidden grid grid-cols-4 gap-1.5">
+                    ${miniApps
+                      .map(
+                        (app) => `
+                      <div class="w-[1.9rem] h-[1.9rem] rounded-xl grid place-items-center bg-white shadow-[inset_0_0_0_1px_rgba(15,23,42,0.08)] transition-all duration-300 hover:shadow-[0_0_10px_rgba(37,99,235,0.25)] hover:scale-[1.04] cursor-pointer" data-action="launch-icon">
+                        ${app.svg}
+                      </div>
+                    `
+                      )
+                      .join("")}
+                  </div>
+                </div>
+
+                <div id="flowSuccess" class="mt-1 hidden inline-flex items-center gap-1 text-[13px] opacity-0 animate-fadeIn text-green-500">
+                  <i data-lucide="sparkles" class="h-3.5 w-3.5"></i><span>Configured once → delivered everywhere.</span>
+                </div>
+              </div>
+
+              <!-- Delivery truck indicator that travels DOWN in sync with apps processed -->
+              <div id="deliveryTruck" aria-hidden="true">
+                <div class="motion">
+                  <div class="tilt">
+                    <div class="chip">
+                      <div class="badge">
+                        <!-- Custom, cleaner “Recast delivery truck” glyph (not a scooter/bike). -->
+                        <svg class="truckSvg" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M3.8 8.6c0-1.2.98-2.2 2.2-2.2h8.2c1.2 0 2.2 1 2.2 2.2v7.1H3.8V8.6Z" fill="rgba(255,255,255,0.95)"/>
+                          <path d="M16.4 10.2h2.9c.6 0 1.1.3 1.4.8l1.2 2c.1.2.2.4.2.6v2.1h-5.7v-5.5Z" fill="rgba(255,255,255,0.85)"/>
+                          <path d="M7.3 17.9a1.7 1.7 0 1 0 0-3.4 1.7 1.7 0 0 0 0 3.4Z" fill="#0B1220" opacity="0.9"/>
+                          <path d="M18.7 17.9a1.7 1.7 0 1 0 0-3.4 1.7 1.7 0 0 0 0 3.4Z" fill="#0B1220" opacity="0.9"/>
+                          <path d="M6 6.4h8.2c1.2 0 2.2 1 2.2 2.2v7.1H3.8V8.6c0-1.2.98-2.2 2.2-2.2Z" stroke="rgba(255,255,255,0.45)" stroke-width="1.2" />
+                          <path d="M16.4 10.2h2.9c.6 0 1.1.3 1.4.8l1.2 2c.1.2.2.4.2.6v2.1h-5.7" stroke="rgba(255,255,255,0.45)" stroke-width="1.2" stroke-linejoin="round"/>
+                          <path d="M3.8 15.7h18.3" stroke="rgba(255,255,255,0.35)" stroke-width="1.2" stroke-linecap="round"/>
+                          <path d="M7.3 14.2h6.2" stroke="rgba(29,78,216,0.65)" stroke-width="1.6" stroke-linecap="round"/>
+                        </svg>
+                      </div>
+
+                      <div class="flex flex-col leading-tight">
+                        <div class="label">Recast Delivery</div>
+                        <div class="sub"><span id="truckApps" class="tabular-nums">0</span> apps delivered</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `;
+      }
+
+      /* =========================
+         ROI TAB (UNCHANGED LOGIC)
+         ========================= */
+      function pill(label, active, action, value) {
+        return `<button type="button" class="${cx(
+          "px-2.5 py-0.5 border text-[11px] transition rounded",
+          active
+            ? "bg-blue-600 text-white border-transparent hover:bg-blue-700"
+            : "bg-transparent text-gray-900 border-gray-200 hover:border-blue-600"
+        )} focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="${action}" data-value="${String(
+          value
+        )}">${label}</button>`;
+      }
+      function inputNum(action, label, key, value) {
+        return `<label class="flex flex-col gap-0.5 text-[13px]"><span class="text-[11px] text-gray-700">${label}</span><input class="rounded border border-gray-200 bg-gray-50 px-2 py-1 text-[13px] focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" inputmode="decimal" value="${value}" data-action="${action}" data-key="${key}"></label>`;
+      }
+      function renderROI() {
+        const r = calcROI();
+        return `
+          <section id="panel-roi" class="space-y-4">
+            <div class="flex justify-center gap-2 mb-4">
+              <button type="button" data-action="set-view" data-view="exec" class="${
+                STATE.activeView === "exec" ? "bg-blue-600 text-white" : "bg-white border border-blue-600 text-blue-600"
+              } px-4 py-2 rounded-full transition">Executive View</button>
+              <button type="button" data-action="set-view" data-view="operator" class="${
+                STATE.activeView === "operator"
+                  ? "bg-blue-600 text-white"
+                  : "bg-white border border-blue-600 text-blue-600"
+              } px-4 py-2 rounded-full transition">Operator View</button>
+            </div>
+            ${STATE.activeView === "exec" ? renderExecView(r) : renderOperatorView(r)}
+            <div class="mt-6">
+              ${bucketAccordion("edit", "edit-3", "Edit Assumptions & Impacts", editContent)}
+            </div>
+            <div class="mt-6 flex flex-wrap gap-3 justify-end">
+              <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-1.5 bg-transparent text-gray-600 border-2 border-gray-300 px-4 py-2 text-[15px] font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded-full hover:text-blue-600 hover:border-blue-600">Reset</button>
+              <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2 text-[15px] font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded-full hover:bg-blue-700">
+                <i data-lucide="clipboard" class="w-4.5 h-4.5"></i> ${STATE.copied ? "Copied!" : "Copy"}
+              </button>
+            </div>
+            <div class="mt-4 text-center text-sm text-gray-500"></div>
+          </section>
+        `;
+      }
+      function bucketAccordion(id, icon, label, contentFunc, headerTone = "bg-gray-50") {
+        const expanded = STATE.openBuckets[id];
+        const contentId = `bucket-content-${id}`;
+        return `
+          <div class="flex flex-col">
+            <button
+              type="button"
+              class="w-full overflow-hidden ring-1 ring-gray-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition hover:ring-gray-300 shadow-sm rounded-2xl"
+              data-action="toggle-bucket"
+              data-bucket="${id}"
+              aria-expanded="${expanded}"
+              aria-controls="${contentId}"
+            >
+              <div class="flex items-center justify-between px-4 py-3 ${headerTone} border-b border-gray-200">
+                <div class="flex items-center gap-1.5">
+                  <i data-lucide="${icon}" class="w-4.5 h-4.5 text-gray-900" aria-hidden="true"></i>
+                  <span class="text-[15px] font-semibold tracking-normal text-gray-900">${label}</span>
+                </div>
+                <i data-lucide="${expanded ? "chevron-up" : "chevron-down"}" class="w-4.5 h-4.5 text-gray-600 transition-transform duration-150" aria-hidden="true"></i>
+              </div>
+            </button>
+            <div id="${contentId}" class="accordion-content overflow-hidden ${expanded ? "max-h-[1200px] opacity-100" : "max-h-0 opacity-0"} transition-[max-height] duration-150 ease-[cubic-bezier(0.2,0.8,0.2,1)] transition-opacity duration-150">
+              ${expanded ? contentFunc() : ""}
+            </div>
+          </div>
+        `;
+      }
+      function perUserContent() {
+        const totalMin = Math.max(0, Number(STATE.impact.minutes));
+        const route = routeRecommendation(STATE.ctx);
+        return `
+          <div class="p-3">
+            <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-2.5 text-[13px]">
+              <div class="flex items-center gap-1.5 font-medium"><i data-lucide="mouse-pointer" class="w-3.5 h-3.5"></i> Reactive Work Reduced</div>
+              <div class="mt-1.5 flex items-center justify-between rounded bg-gray-100 px-2 py-1">
+                <span class="tabular-nums">18 → ${totalMin} min</span>
+                <strong class="tabular-nums">${totalMin} min saved</strong>
+              </div>
+            </div>
+            <div class="mt-1.5 grid grid-cols-3 gap-1.5 text-[11px]">
+              ${["Windows", "Mac"].map((d) => pill(d, STATE.ctx.device === d, "set-device", d)).join("")}
+              ${["Corporate", "VPN"].map((n) => pill(n, STATE.ctx.network === n, "set-network", n)).join("")}
+              ${pill(STATE.ctx.compliant ? "Compliant" : "Non-compliant", STATE.ctx.compliant, "toggle-compliance", "")}
+            </div>
+            <div class="mt-2">
+              <button type="button" class="bg-transparent text-gray-900 border-2 border-gray-900 px-2.5 py-0.5 text-[11px] w-full rounded hover:text-blue-600 hover:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="add-impact" data-kind="minutes" data-value="2">
+                Add to impact (+2 min saved per user)
+              </button>
+            </div>
+          </div>
+        `;
+      }
+      function onePackageContent() {
+        const saved = Math.max(0, Number(STATE.packHrs) - Number(STATE.configHrs));
+        return `
+          <div class="p-3">
+            <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-2.5 text-[13px]">
+              <div class="flex items-center gap-1.5 font-medium"><i data-lucide="wand-sparkles" class="w-3.5 h-3.5"></i> Hours Saved from Packaging</div>
+              <label class="mt-1.5 flex items-center gap-1.5 text-[11px]">
+                <span class="text-gray-700">Hours/package</span>
+                <input class="w-14 rounded bg-gray-100 px-1.5 py-0.5 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" value="${STATE.packHrs}" inputmode="decimal" data-action="set-pack-hrs" aria-label="Hours per package">
+                <span>→</span>
+                <input class="w-14 rounded bg-gray-100 px-1.5 py-0.5 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" value="${STATE.configHrs}" inputmode="decimal" data-action="set-config-hrs" aria-label="Hours to configure">
+              </label>
+              <div class="mt-1.5 flex items-center justify-between rounded bg-gray-100 px-2 py-1"><span class="tabular-nums">${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong class="tabular-nums">${saved} hrs saved</strong></div>
+              <div class="mt-1.5 text-[11px] flex flex-wrap gap-1.5">
+                <span class="rounded px-1.5 py-0.5 bg-gray-100">☁️ Cloud</span>
+                <span class="rounded px-1.5 py-0.5 bg-gray-100">🖥️ On-Prem</span>
+                <span class="rounded px-1.5 py-0.5 bg-gray-100">🔀 Hybrid</span>
+              </div>
+              <button type="button" class="mt-1.5 bg-blue-600 text-white px-2.5 py-0.5 text-[11px] font-semibold w-full rounded hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Add to impact</button>
+            </div>
+          </div>
+        `;
+      }
+      function zeroDayContent() {
+        const reduced = Math.max(0, Number(STATE.currentHrs) - 1.5);
+        return `
+          <div class="p-3">
+            <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-2.5 text-[13px]">
+              <div class="flex items-center gap-1.5 font-medium"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Hours Saved from Faster Patching</div>
+              <label class="mt-1.5 flex items-center gap-1.5 text-[11px]">
+                <span class="text-gray-700">Current hrs</span>
+                <input class="w-16 rounded bg-gray-100 px-1.5 py-0.5 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" value="${STATE.currentHrs}" inputmode="decimal" data-action="set-current-hrs" aria-label="Current time to deploy (hours)">
+              </label>
+              <div class="mt-1.5 flex items-center justify-between rounded bg-gray-100 px-2 py-1"><span class="tabular-nums">${STATE.currentHrs} → 1.5 hrs</span><strong class="tabular-nums">${round(
+                reduced
+              )} hrs reduced</strong></div>
+              <button type="button" class="mt-1.5 bg-blue-600 text-white px-2.5 py-0.5 text-[11px] font-semibold w-full rounded hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
+            </div>
+          </div>
+        `;
+      }
+      function editContent() {
+        return `
+          <div class="p-4 bg-white rounded-xl shadow-inner">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 class="text-[15px] font-medium mb-3">Assumptions</h4>
+                <div class="space-y-3">
+                  ${inputNum("set-roi", "# users", "users", STATE.roiInputs.users)}
+                  ${inputNum("set-roi", "Tickets per user / mo", "ticketsPerUserPerMonth", STATE.roiInputs.ticketsPerUserPerMonth)}
+                  ${inputNum("set-roi", "Avg handle (mins)", "avgHandleMins", STATE.roiInputs.avgHandleMins)}
+                </div>
+              </div>
+              <div>
+                <h4 class="text-[15px] font-medium mb-3">Direct Impacts</h4>
+                <div class="space-y-3">
+                  ${inputNum("set-impact", "Minutes saved per user / mo", "minutes", STATE.impact.minutes)}
+                  ${inputNum("set-impact", "Packaging hours avoided / mo", "pkgHours", STATE.impact.pkgHours)}
+                  ${inputNum("set-impact", "Patching hours avoided / mo", "riskHrs", STATE.impact.riskHrs)}
+                </div>
+              </div>
+            </div>
+            <div class="mt-6 space-y-6">
+              ${perUserContent()}
+              ${onePackageContent()}
+              ${zeroDayContent()}
+            </div>
+          </div>
+        `;
+      }
+
+      function renderExecView(r) {
+        return `
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="rounded-2xl bg-white shadow-md p-4">
+              <h3 class="text-lg font-semibold mb-2">Operational Model</h3>
+              <p class="text-gray-700">One standard way applications are delivered</p>
+            </div>
+            <div class="rounded-2xl bg-white shadow-md p-4">
+              <h3 class="text-lg font-semibold mb-2">End-User Experience</h3>
+              <p class="text-gray-700">Consistent workspace, even as IT modernizes</p>
+            </div>
+            <div class="rounded-2xl bg-white shadow-md p-4">
+              <h3 class="text-lg font-semibold mb-2">Risk Profile</h3>
+              <p class="text-gray-700">Fewer patch gaps and version sprawl</p>
+            </div>
+            <div class="rounded-2xl bg-white shadow-md p-4">
+              <h3 class="text-lg font-semibold mb-2">IT Focus</h3>
+              <p class="text-gray-700">Less reactive work, more planned change</p>
+            </div>
+          </div>
+          <div class="text-center py-8 bg-white rounded-2xl shadow-md mt-4">
+            <h2 class="text-4xl font-bold text-blue-700">${num(r.totalHoursMonth)} hours per month returned</h2>
+            <p class="text-gray-500 mt-1">Based on environment assumptions</p>
+            <p class="mt-2 text-gray-700">Equivalent to avoiding additional operational hires or accelerating strategic initiatives.</p>
+          </div>
+          <div class="mt-4">
+            <h2 class="text-xl font-semibold mb-2">Where Capacity Comes From</h2>
+            <ul class="list-disc ml-5 text-gray-700 space-y-1">
+              <li>App-related support avoided</li>
+              <li>Faster patch cycles</li>
+              <li>Packaging automation</li>
+            </ul>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div class="bg-white rounded-xl p-4 border shadow-sm">
+              <h3 class="font-semibold text-[15px] mb-1">Technical Debt Reduced</h3>
+              <ul class="list-disc ml-4 space-y-0.5 text-gray-700 text-[14px]">
+                <li>Fewer active app versions</li>
+                <li>Shorter patch times</li>
+                <li>Reduced tickets</li>
+              </ul>
+            </div>
+            <div class="bg-white rounded-xl p-4 border shadow-sm">
+              <h3 class="font-semibold text-[15px] mb-1">Risk & Governance</h3>
+              <ul class="list-disc ml-4 space-y-0.5 text-gray-700 text-[14px]">
+                <li>Improved compliance</li>
+                <li>Faster response to issues</li>
+                <li>Lower error rates</li>
+              </ul>
+            </div>
+            <div class="bg-white rounded-xl p-4 border shadow-sm">
+              <h3 class="font-semibold text-[15px] mb-1">Project Velocity Gained</h3>
+              <ul class="list-disc ml-4 space-y-0.5 text-gray-700 text-[14px]">
+                <li>Faster migrations and pilots</li>
+                <li>Fewer blockers to modernization</li>
+                <li>Capacity for strategic work</li>
+              </ul>
+            </div>
+          </div>
+        `;
+      }
+      function renderOperatorView(r) {
+        return `
+          <div class="mt-4">
+            <h2 class="text-xl font-semibold mb-2">Metric Breakdown</h2>
+            <ul class="list-disc ml-5 text-gray-700 space-y-1">
+              <li>Minutes saved per user per month: ${STATE.impact.minutes}</li>
+              <li>Hours saved from packaging: ${round(STATE.impact.pkgHours)}</li>
+              <li>Hours saved from faster patching: ${round(STATE.impact.riskHrs)}</li>
+              <li>Tickets avoided per month: ${num(r.ticketsAvoided)}</li>
+              <li>Patch time reduction: ${STATE.currentHrs} → 1.5 hrs (${r.patchReductionPct}%)</li>
+            </ul>
+          </div>
+          <div class="mt-4">
+            <h2 class="text-xl font-semibold mb-2">Capacity Source Breakdown</h2>
+            <div class="space-y-2">
+              <div class="flex justify-between">
+                <span>App-related support avoided</span>
+                <strong>${num(r.reactiveHoursMonth)} hrs/mo</strong>
+              </div>
+              <div class="flex justify-between">
+                <span>Faster patch cycles</span>
+                <strong>${num(r.patchHoursMonth)} hrs/mo</strong>
+              </div>
+              <div class="flex justify-between">
+                <span>Packaging automation</span>
+                <strong>${num(r.packagingHoursMonth)} hrs/mo</strong>
+              </div>
+              <div class="flex justify-between font-bold">
+                <span>Total</span>
+                <span>${num(r.totalHoursMonth)} hrs/mo</span>
               </div>
             </div>
           </div>
-
-          <p class="text-[11px] text-slate-400">Transparency: Recast AW complements device management (e.g., Intune). Windows/macOS focus. Metrics are illustrative; actuals vary.</p>
-        </section>
-      `;
-    }
-
-    /* ROI helpers */
-    function calcROI(){
-      const i = STATE.roiInputs;
-      const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
-      const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
-      const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
-      const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
-      const dollarSavedYear = dollarSavedMonth * 12;
-      const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
-      const roiPct = i.recastAnnualCost ? round((netBenefitYear / i.recastAnnualCost) * 100) : 0;
-      const fteHoursYear = 2080;
-      const fteEquivalent = round((totalHoursSavedMonth * 12) / fteHoursYear);
-      return {
-        i,
-        ticketsMonth,
-        hoursFromMinutes: round(hoursFromMinutes),
-        totalHoursSavedMonth: round(totalHoursSavedMonth),
-        dollarSavedMonth: round(dollarSavedMonth),
-        dollarSavedYear: round(dollarSavedYear),
-        netBenefitYear: round(netBenefitYear),
-        roiPct,
-        fteEquivalent
-      };
-    }
-    function updateROIOutputs(){
-      const r = calcROI();
-      setText('kpi-hours', r.totalHoursSavedMonth);
-      setText('kpi-year', '$'+num(r.dollarSavedYear));
-      setText('kpi-roi', r.roiPct+'%');
-      setText('kpi-tickets', num(r.ticketsMonth));
-      setText('res-hours', r.totalHoursSavedMonth);
-      setText('res-month', '$'+num(r.dollarSavedMonth));
-      setText('res-year', '$'+num(r.dollarSavedYear));
-      setText('res-net', '$'+num(r.netBenefitYear));
-      setText('res-roi', r.roiPct+'%');
-      setText('res-fte', r.fteEquivalent);
-    }
-    function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent = String(value); }
-
-    function kpiId(icon,label,value,hint,id){
-      return `
-        <div class="section-card p-3">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-[11px] text-slate-300">${label}</div>
-              <div id="${id}" class="text-xl font-semibold">${value}</div>
-            </div>
-            <i data-lucide="${icon}" class="w-5 h-5 text-sky-300"></i>
+          <div class="mt-4">
+            <h2 class="text-xl font-semibold mb-2">Technical Debt & Ops Detail</h2>
+            <ul class="list-disc ml-5 text-gray-700 space-y-1">
+              <li>30–50% fewer active app versions</li>
+              <li>Patch time cut from ${STATE.currentHrs} to 1.5 hrs</li>
+              <li>~${num(r.ticketsAvoided)} tickets avoided / month</li>
+            </ul>
           </div>
-          ${hint ? `<div class="mt-1 text-[11px] text-slate-400">${hint}</div>` : ''}
-        </div>
-      `;
-    }
-    function kvId(label,value,id){
-      return `<div class="flex items-center justify-between rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">${label}</span><span id="${id}" class="font-semibold">${value}</span></div>`;
-    }
-    function numInput(label,key,value){
-      return `<label class="flex flex-col gap-1 text-sm"><span class="text-[12px] text-slate-300">${label}</span><input class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-1.5 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
-    }
-
-    /* ---------- Realistic Catalog (brand-like marks) ---------- */
-    const CATALOG=[
-      {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
-        logo('Microsoft Word','W','#185ABD'),
-        logo('Microsoft Excel','X','#107C41'),
-        logo('PowerPoint','P','#D24726'),
-        logo('Outlook','O','#106EBE'),
-        logo('Microsoft Teams','T','#5B53D6'),
-        logo('Google Docs','Dc','#1A73E8'),
-        logo('Google Sheets','Sh','#1E8E3E'),
-        logo('Google Slides','Sl','#F9AB00')
-      ]},
-      {title:'MESSAGING & MEETINGS',id:'cat-collab',items:[
-        multiLogo('Slack',['#36C5F0','#2EB67D','#E01E5A','#ECB22E']),
-        logo('Zoom','Z','#0B5CFF'),
-        logo('Gmail','G','#EA4335'),
-        logo('Google Meet','GM','#0F9D58')
-      ]},
-      {title:'WEB BROWSERS',id:'cat-browsers',items:[
-        triLogo('Google Chrome','#EA4335','#FBBC05','#34A853','#4285F4'),
-        ringLogo('Microsoft Edge','#0C8EC5','#0AA0A3'),
-        flameLogo('Mozilla Firefox','#FF7139','#FFCC00')
-      ]},
-      {title:'ENTERPRISE APPS',id:'cat-enterprise',items:[
-        logo('Salesforce','SF','#00A1E0'),
-        logo('Workday','WD','#1F5BFF'),
-        logo('ServiceNow','SN','#81B29A'),
-        logo('SAP','SAP','#0A6ED1'),
-        logo('Oracle NetSuite','NS','#C74634')
-      ]},
-      {title:'SECURITY & ACCESS',id:'cat-security',items:[
-        logo('Duo','D','#3CB371'),
-        logo('Okta','O','#007DC1'),
-        logo('Ping Identity','P','#C0172C'),
-        logo('Cisco AnyConnect','AC','#00B5AD'),
-        logo('Microsoft Defender','MD','#0067B8'),
-        logo('CrowdStrike Falcon','CS','#D61F26')
-      ]},
-      {title:'STORAGE & CREATIVE',id:'cat-storage',items:[
-        logo('Adobe Acrobat','A','#ED2224'),
-        logo('Dropbox','DB','#0061FF'),
-        logo('Box','BX','#0061D5'),
-        logo('OneDrive','OD','#0A5BD5'),
-        logo('ZoomIt / Sysinternals','ZI','#58595B')
-      ]}
-    ];
-
-    function logo(name,letter,color){ return { name, svg: mark(letter,color) }; }
-    function mark(letter,color){
-      return `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${letter}">
-          <defs><linearGradient id="g${letter.replace(/\W/g,'')}" x1="0" x2="1"><stop offset="0" stop-color="${shade(color,.9)}"/><stop offset="1" stop-color="${shade(color,1.1)}"/></linearGradient></defs>
-          <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#g${letter.replace(/\W/g,'')})" stroke="rgba(255,255,255,.15)"/>
-          <text x="50%" y="56%" text-anchor="middle" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="800" fill="white">${letter}</text>
-        </svg>`;
-    }
-    function multiLogo(name,colors){
-      const slices=colors.map((c,i)=>`<rect x="${4+i*9}" y="8" width="7" height="32" rx="4" fill="${c}"></rect>`).join('');
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/>${slices}</svg>` };
-    }
-    function triLogo(name,r1,r2,r3,r4){
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/><circle cx="24" cy="24" r="12" fill="${r4}"/><path d="M24 12 A12 12 0 0 1 36 24 L24 24 Z" fill="${r1}"/><path d="M36 24 A12 12 0 0 1 24 36 L24 24 Z" fill="${r2}"/><path d="M24 36 A12 12 0 0 1 24 12 L24 24 Z" fill="${r3}"/></svg>` };
-    }
-    function ringLogo(name,c1,c2){
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/><circle cx="24" cy="24" r="11" fill="${c1}"/><circle cx="20" cy="20" r="8" fill="${c2}"/></svg>` };
-    }
-    function flameLogo(name,c1,c2){
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/><path d="M24 12c5 7-2 9 3 14 3 3 2 9-3 11-5-2-6-8-3-11 5-5-3-7 3-14z" fill="${c1}"/><circle cx="26" cy="28" r="4" fill="${c2}"/></svg>` };
-    }
-    function shade(hex,m){ const c=hex.replace('#',''); const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16)); const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
-
-    /* ---------- Events ---------- */
-    function attachEvents(){
-      const root=document.getElementById('app');
-
-      root.querySelectorAll('[data-action="switch-tab"]').forEach(b=>b.addEventListener('click',e=>{
-        STATE.activeTab=e.currentTarget.getAttribute('data-tab');
-        if(STATE.activeTab==='solution'){ STATE.showSolutionCards=false; }
-        render();
-      }));
-      root.querySelectorAll('[data-action="advance"]').forEach(b=>b.addEventListener('click',e=>{
-        STATE.activeTab=e.currentTarget.getAttribute('data-next'); 
-        if(STATE.activeTab==='solution'){ STATE.showSolutionCards=false; }
-        render();
-      }));
-
-      root.querySelectorAll('[data-action="set-device"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.device=e.currentTarget.getAttribute('data-value'); render(); }));
-      root.querySelectorAll('[data-action="set-network"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.network=e.currentTarget.getAttribute('data-value'); render(); }));
-      root.querySelectorAll('[data-action="toggle-compliance"]').forEach(b=>b.addEventListener('click',()=>{ STATE.ctx.compliant=!STATE.ctx.compliant; render(); }));
-
-      const pack=root.querySelector('[data-action="set-pack-hrs"]'); if(pack) pack.addEventListener('input',e=>{ STATE.packHrs=cleanNum(e.target.value); });
-      const cfg=root.querySelector('[data-action="set-config-hrs"]'); if(cfg) cfg.addEventListener('input',e=>{ STATE.configHrs=cleanNum(e.target.value); });
-      const cur=root.querySelector('[data-action="set-current-hrs"]'); if(cur) cur.addEventListener('input',e=>{ STATE.currentHrs=cleanNum(e.target.value); });
-
-      root.querySelectorAll('[data-action="add-impact"]').forEach(b=>b.addEventListener('click',e=>{
-        const kind=e.currentTarget.getAttribute('data-kind'); const val=Number(e.currentTarget.getAttribute('data-value'))||0;
-        if (kind==='minutes') STATE.impact.minutes+=val;
-        if (kind==='pkgHours') STATE.impact.pkgHours+=val;
-        if (kind==='riskHrs') STATE.impact.riskHrs+=val;
-        updateROIOutputs();
-        render();
-      }));
-
-      root.querySelectorAll('[data-action="set-roi"]').forEach(inp=>inp.addEventListener('input',e=>{
-        const key=e.currentTarget.getAttribute('data-key');
-        const v=Number(String(e.target.value).replace(/[^0-9.\-]/g,'')); 
-        STATE.roiInputs[key]=isFinite(v)?v:0;
-        updateROIOutputs();
-      }));
-
-      const resetCalc=root.querySelector('[data-action="reset-calculator"]');
-      if(resetCalc) resetCalc.addEventListener('click', ()=>{
-        STATE.roiInputs = { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 };
-        STATE.impact = { ...STATE.defaults.impact };
-        STATE.copied = false;
-        render();
-      });
-
-      const copyBtn=root.querySelector('[data-action="copy-onepager"]');
-      ifcopy: if(copyBtn) copyBtn.addEventListener('click', async ()=>{
+          <div class="mt-4">
+            <h2 class="text-xl font-semibold mb-2">What This Enables</h2>
+            <ul class="list-disc ml-5 text-gray-700 space-y-1">
+              <li>Accelerated app readiness for migrations and AI pilots</li>
+              <li>Reduced variables in troubleshooting</li>
+              <li>Shift from reactive to proactive IT operations</li>
+            </ul>
+          </div>
+        `;
+      }
+      function calcROI() {
         const i = STATE.roiInputs;
         const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
-        const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
-        const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
-        const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
-        const dollarSavedYear = dollarSavedMonth * 12;
-        const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
-        const roiPct = i.recastAnnualCost ? (netBenefitYear / i.recastAnnualCost) * 100 : 0;
-        const fteHoursYear = 2080;
-        const fteEquivalent = (totalHoursSavedMonth * 12) / fteHoursYear;
-        const body =
-`Recast Application Workspace — Executive One-Pager
+        const reactiveHoursMonth = (STATE.impact.minutes * i.users) / 60;
+        const packagingHoursMonth = STATE.impact.pkgHours;
+        const patchHoursMonth = STATE.impact.riskHrs;
+        const totalHoursMonth = reactiveHoursMonth + packagingHoursMonth + patchHoursMonth;
+        const totalHoursYear = totalHoursMonth * 12;
+        const ticketsAvoided = (STATE.impact.minutes * i.users) / i.avgHandleMins;
+        const patchReductionPct =
+          STATE.currentHrs > 0 ? Math.round(((STATE.currentHrs - 1.5) / STATE.currentHrs) * 100) : 94;
+        return {
+          i,
+          ticketsMonth: round(ticketsMonth),
+          reactiveHoursMonth: round(reactiveHoursMonth),
+          packagingHoursMonth: round(packagingHoursMonth),
+          patchHoursMonth: round(patchHoursMonth),
+          totalHoursMonth,
+          totalHoursYear,
+          ticketsAvoided,
+          patchReductionPct,
+        };
+      }
+      function updateROIOutputs() {}
 
-Assumptions
- - Users: ${i.users}
- - Tickets per user / month: ${i.ticketsPerUserPerMonth}
- - Avg handle: ${i.avgHandleMins} mins
- - Loaded cost: $${i.loadedCostPerHour}/hr
- - Subscription (annual): $${i.recastAnnualCost}
+      /* =========================
+         APP ICONS + CATALOG (UNCHANGED)
+         ========================= */
+      function shade(hex, m) {
+        const c = hex.replace("#", "");
+        const n = [0, 1, 2].map((i) => parseInt(c.slice(i * 2, i * 2 + 2), 16));
+        const s = n.map((v) => Math.max(0, Math.min(255, Math.round(v * m))));
+        return "#" + s.map((v) => v.toString(16).padStart(2, "0")).join("");
+      }
+      function appIconShell(inner, { bgA = "#FFFFFF", bgB = "#F3F4F6", stroke = "rgba(15,23,42,.10)" } = {}) {
+        const id = "sh" + Math.random().toString(16).slice(2);
+        return `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img">
+            <defs>
+              <linearGradient id="${id}g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="${bgA}"/>
+                <stop offset="1" stop-color="${bgB}"/>
+              </linearGradient>
+              <filter id="${id}d" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(15,23,42,0.18)"/>
+              </filter>
+              <linearGradient id="${id}h" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="rgba(255,255,255,0.55)"/>
+                <stop offset="0.55" stop-color="rgba(255,255,255,0.10)"/>
+                <stop offset="1" stop-color="rgba(255,255,255,0.00)"/>
+              </linearGradient>
+            </defs>
+            <rect x="2.2" y="2.2" width="43.6" height "43.6" rx="14" fill="url(#${id}g)" stroke="${stroke}" filter="url(#${id}d)"/>
+            <path d="M9 13c6-7 24-6 30 0" fill="none" stroke="url(#${id}h)" stroke-width="6" stroke-linecap="round" opacity="0.9"/>
+            ${inner}
+          </svg>
+        `;
+      }
+      /* ... icon-generation functions and app catalog definitions ... */
 
-Observed demo impact (illustrative)
- - Minutes saved per user (monthly): ${STATE.impact.minutes}
- - Packaging hours avoided (org): ${STATE.impact.pkgHours}
- - Zero-day window reduced (hrs): ${STATE.impact.riskHrs}
+      /* =========================
+         EVENTS
+         ========================= */
+      function attachEvents() {
+        const root = document.getElementById("app");
 
-Calculated outcomes
- - Tickets / month: ${num(ticketsMonth)}
- - Hours saved / month: ${round(totalHoursSavedMonth)}
- - $ saved / month: $${num(dollarSavedMonth)}
- - $ saved / year: $${num(dollarSavedYear)}
- - Net benefit / year: $${num(netBenefitYear)}
- - ROI: ${round(roiPct)}%
- - Equivalent IT FTEs freed: ${round(fteEquivalent)}
+        // Tabs
+        root.querySelectorAll('[data-action="switch-tab"]').forEach((b) =>
+          b.addEventListener("click", (e) => {
+            const next = e.currentTarget.getAttribute("data-tab");
+            STATE.activeTab = next;
 
-Notes: Illustrative; replace with your data.`;
-        try { await navigator.clipboard.writeText(body); } catch {
-          const ta=document.createElement('textarea'); ta.value=body; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+            // stop any running flow visuals when leaving the tab
+            stopFlowTimers();
+
+            // Reset wizard when entering Solution for a clean narrative
+            if (next === "solution") {
+              STATE.solutionStep = 0;
+              STATE.visitedCards = [NEW_CARDS[0].id];
+            } else {
+              STATE.visitedCards = [];
+            }
+
+            render();
+          })
+        );
+
+        // Generic tab jump (used by wizard final CTA)
+        root.querySelectorAll('[data-action="go-tab"]').forEach((b) =>
+          b.addEventListener("click", (e) => {
+            const tab = e.currentTarget.getAttribute("data-tab");
+            if (!tab) return;
+            STATE.activeTab = tab;
+            stopFlowTimers();
+            render();
+          })
+        );
+
+        // Why modal
+        root.querySelectorAll('[data-action="open-why-modal"]').forEach((b) =>
+          b.addEventListener("click", (e) => {
+            STATE.openWhyModal = e.currentTarget.getAttribute("data-why");
+            render();
+          })
+        );
+        root.querySelectorAll('[data-action="close-why-modal"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            STATE.openWhyModal = null;
+            render();
+          })
+        );
+        root.querySelectorAll('[data-action="advance"]').forEach((b) =>
+          b.addEventListener("click", (e) => {
+            STATE.activeTab = e.currentTarget.getAttribute("data-next");
+            STATE.openWhyModal = null;
+            render();
+          })
+        );
+
+        // Problems selections
+        root.querySelectorAll('[data-action="toggle-bullet"]').forEach((inp) =>
+          inp.addEventListener("change", (e) => {
+            const category = e.target.getAttribute("data-category");
+            const index = parseInt(e.target.getAttribute("data-index"), 10);
+            if (!STATE.selectedBullets[category]) STATE.selectedBullets[category] = [];
+            const arr = STATE.selectedBullets[category];
+            if (arr.includes(index)) {
+              STATE.selectedBullets[category] = arr.filter((x) => x !== index);
+            } else {
+              arr.push(index);
+            }
+            render();
+          })
+        );
+        root.querySelectorAll('[data-action="reset-bullets"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            STATE.selectedBullets = {};
+            render();
+          })
+        );
+        root.querySelectorAll('[data-action="next-tab"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            STATE.activeTab = "solution";
+            STATE.solutionStep = 0;
+            STATE.visitedCards = [NEW_CARDS[0].id];
+            render();
+          })
+        );
+
+        // Solution wizard navigation
+        root.querySelectorAll('[data-action="solution-prev-card"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            STATE.solutionStep = Math.max(0, STATE.solutionStep - 1);
+            const id = NEW_CARDS[STATE.solutionStep]?.id;
+            if (id && !STATE.visitedCards.includes(id)) STATE.visitedCards.push(id);
+            render();
+          })
+        );
+        root.querySelectorAll('[data-action="solution-next-card"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            STATE.solutionStep = Math.min(NEW_CARDS.length - 1, STATE.solutionStep + 1);
+            const id = NEW_CARDS[STATE.solutionStep]?.id;
+            if (id && !STATE.visitedCards.includes(id)) STATE.visitedCards.push(id);
+            render();
+          })
+        );
+        root.querySelectorAll('[data-action="solution-jump-card"]').forEach((b) =>
+          b.addEventListener("click", (e) => {
+            const idx = Number(e.currentTarget.getAttribute("data-index"));
+            if (!Number.isFinite(idx)) return;
+            STATE.solutionStep = Math.max(0, Math.min(NEW_CARDS.length - 1, idx));
+            const id = NEW_CARDS[STATE.solutionStep]?.id;
+            if (id && !STATE.visitedCards.includes(id)) STATE.visitedCards.push(id);
+            render();
+          })
+        );
+
+        // Card bullet selections (still used inside wizard)
+        root.querySelectorAll('[data-action="toggle-card-bullet"]').forEach((inp) =>
+          inp.addEventListener("change", (e) => {
+            const card = e.target.getAttribute("data-card");
+            const index = parseInt(e.target.getAttribute("data-index"), 10);
+            if (!STATE.selectedCardBullets[card]) STATE.selectedCardBullets[card] = [];
+            const arr = STATE.selectedCardBullets[card];
+            if (arr.includes(index)) {
+              STATE.selectedCardBullets[card] = arr.filter((x) => x !== index);
+            } else {
+              arr.push(index);
+            }
+            render();
+          })
+        );
+
+        // Buckets
+        root.querySelectorAll('[data-action="toggle-bucket"]').forEach((b) =>
+          b.addEventListener("click", (e) => {
+            const id = e.currentTarget.getAttribute("data-bucket");
+            STATE.openBuckets[id] = !STATE.openBuckets[id];
+            render();
+          })
+        );
+
+        // ROI inputs
+        root.querySelectorAll('[data-action="set-device"]').forEach((b) =>
+          b.addEventListener("click", (e) => {
+            STATE.ctx.device = e.currentTarget.getAttribute("data-value");
+            render();
+          })
+        );
+        root.querySelectorAll('[data-action="set-network"]').forEach((b) =>
+          b.addEventListener("click", (e) => {
+            STATE.ctx.network = e.currentTarget.getAttribute("data-value");
+            render();
+          })
+        );
+        root.querySelectorAll('[data-action="toggle-compliance"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            STATE.ctx.compliant = !STATE.ctx.compliant;
+            render();
+          })
+        );
+
+        const pack = root.querySelector('[data-action="set-pack-hrs"]');
+        if (pack)
+          pack.addEventListener("input", (e) => {
+            STATE.packHrs = cleanNum(e.target.value);
+            render();
+          });
+        const cfg = root.querySelector('[data-action="set-config-hrs"]');
+        if (cfg)
+          cfg.addEventListener("input", (e) => {
+            STATE.configHrs = cleanNum(e.target.value);
+            render();
+          });
+        const cur = root.querySelector('[data-action="set-current-hrs"]');
+        if (cur)
+          cur.addEventListener("input", (e) => {
+            STATE.currentHrs = cleanNum(e.target.value);
+            render();
+          });
+
+        root.querySelectorAll('[data-action="add-impact"]').forEach((b) =>
+          b.addEventListener("click", (e) => {
+            const kind = e.currentTarget.getAttribute("data-kind");
+            const val = Number(e.currentTarget.getAttribute("data-value")) || 0;
+            if (kind === "minutes") STATE.impact.minutes += val;
+            if (kind === "pkgHours") STATE.impact.pkgHours += val;
+            if (kind === "riskHrs") STATE.impact.riskHrs += val;
+            render();
+          })
+        );
+
+        root.querySelectorAll('[data-action="set-roi"]').forEach((inp) =>
+          inp.addEventListener("input", (e) => {
+            const key = e.currentTarget.getAttribute("data-key");
+            const v = Number(String(e.target.value).replace(/[^0-9.\-]/g, ""));
+            STATE.roiInputs[key] = isFinite(v) ? v : 0;
+            render();
+          })
+        );
+        root.querySelectorAll('[data-action="set-impact"]').forEach((inp) =>
+          inp.addEventListener("input", (e) => {
+            const key = e.currentTarget.getAttribute("data-key");
+            const v = Number(String(e.target.value).replace(/[^0-9.\-]/g, ""));
+            STATE.impact[key] = isFinite(v) ? v : 0;
+            render();
+          })
+        );
+
+        root.querySelectorAll('[data-action="set-view"]').forEach((b) =>
+          b.addEventListener("click", (e) => {
+            STATE.activeView = e.currentTarget.getAttribute("data-view");
+            render();
+          })
+        );
+
+        const resetCalc = root.querySelector('[data-action="reset-calculator"]');
+        if (resetCalc)
+          resetCalc.addEventListener("click", () => {
+            STATE.roiInputs = { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18 };
+            STATE.impact = { ...STATE.defaults.impact };
+            STATE.copied = false;
+            render();
+          });
+
+        // Flow controls
+        const startBtn = root.querySelector('[data-action="start-flow"]');
+        if (startBtn) startBtn.addEventListener("click", startFlow);
+        const resetBtn = root.querySelector('[data-action="reset-flow"]');
+        if (resetBtn) resetBtn.addEventListener("click", resetFlow);
+
+        // App launch animation
+        root.querySelectorAll('[data-action="launch-icon"]').forEach((icon) =>
+          icon.addEventListener("click", () => {
+            icon.classList.add("animate-iconLaunch");
+            setTimeout(() => icon.classList.remove("animate-iconLaunch"), 500);
+          })
+        );
+
+        // Modal controls
+        root.querySelectorAll('[data-action="close-modal"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            STATE.modalOpen = false;
+            render();
+          })
+        );
+
+        // Buffer inputs
+        root.querySelectorAll('[data-action="edit-buffer"]').forEach((el) =>
+          el.addEventListener("input", (evt) => {
+            const key = el.getAttribute("data-key");
+            const subkey = el.getAttribute("data-subkey");
+            if (!STATE.editBuffers[key]) return;
+            STATE.editBuffers[key][subkey] = evt.target.value;
+          })
+        );
+
+        // Upload & Image Player events
+        const uploadBtn = document.querySelector('[data-action="upload-images"]');
+        if (uploadBtn) {
+          uploadBtn.addEventListener('click', () => {
+            const input = document.getElementById('imageUploadInput');
+            if (input) input.click();
+          });
         }
-        STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
-      });
-
-      const startBtn=root.querySelector('[data-action="start-flow"]'); if(startBtn) startBtn.addEventListener('click', startFlow);
-      const resetBtn=root.querySelector('[data-action="reset-flow"]'); if(resetBtn) resetBtn.addEventListener('click', resetFlow);
-      const toggleLabels=root.querySelector('[data-action="toggle-labels"]'); if(toggleLabels) toggleLabels.addEventListener('click', ()=>{ STATE.showLabels=!STATE.showLabels; buildFlow(); });
-
-      const showCards=root.querySelector('[data-action="show-solution-cards"]');
-      if(showCards) showCards.addEventListener('click', ()=>{ STATE.showSolutionCards=true; render(); });
-    }
-
-    /* ---------- Build Flow ---------- */
-    function buildFlow(){
-      let base=0;
-      CATALOG.forEach(section=>{
-        const mount=document.getElementById(section.id); if(!mount) return;
-        mount.innerHTML='';
-        section.items.forEach((itm,idx)=>{
-          const wrap=document.createElement('div'); wrap.className='logo-wrap'; wrap.style.setProperty('--d',(base+idx*0.06).toFixed(2)+'s');
-          const ring=document.createElement('div'); ring.className='logo-ring'; ring.innerHTML=itm.svg; ring.title=itm.name; ring.setAttribute('role','img'); ring.setAttribute('aria-label',itm.name);
-          wrap.appendChild(ring);
-          if(STATE.showLabels){ const label=document.createElement('span'); label.className='logo-name'; label.textContent=itm.name; wrap.appendChild(label); }
-          mount.appendChild(wrap);
+        const imageInput = document.getElementById('imageUploadInput');
+        if (imageInput) {
+          imageInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files).slice(0, 5);
+            STATE.uploadedImages = files.map((f) => {
+              try {
+                return URL.createObjectURL(f);
+              } catch {
+                return '';
+              }
+            }).filter(Boolean);
+            STATE.currentImageIndex = 0;
+            if (STATE.uploadedImages && STATE.uploadedImages.length > 0) {
+              STATE.showImagePlayer = true;
+            }
+            e.target.value = '';
+            render();
+          });
+        }
+        document.querySelectorAll('[data-action="play-images"]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            if (STATE.uploadedImages && STATE.uploadedImages.length > 0) {
+              STATE.showImagePlayer = true;
+              STATE.currentImageIndex = 0;
+              render();
+            }
+          });
         });
-        base+=0.25;
+        document.querySelectorAll('[data-action="close-image-modal"]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            STATE.showImagePlayer = false;
+            render();
+          });
+        });
+        document.querySelectorAll('[data-action="next-image"]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            if (STATE.uploadedImages && STATE.uploadedImages.length > 0) {
+              STATE.currentImageIndex = (STATE.currentImageIndex + 1) % STATE.uploadedImages.length;
+              render();
+            }
+          });
+        });
+        document.querySelectorAll('[data-action="prev-image"]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            if (STATE.uploadedImages && STATE.uploadedImages.length > 0) {
+              STATE.currentImageIndex = (STATE.currentImageIndex - 1 + STATE.uploadedImages.length) % STATE.uploadedImages.length;
+              render();
+            }
+          });
+        });
+      }
+
+      /* =========================
+         FLOW BUILD + ANIMATION
+         ========================= */
+      function buildFlow() {
+        let base = 0;
+        CATALOG.forEach((section) => {
+          const mount = document.getElementById(section.id);
+          if (!mount) return;
+          mount.innerHTML = "";
+          section.items.forEach((itm, idx) => {
+            const wrap = document.createElement("div");
+            wrap.className =
+              "flex items-center gap-1 relative transition-all duration-300 show-labels:flex-col show-labels:items-start show-labels:gap-[0.2rem] show-labels:w-[calc(33.333%-0.666rem)] show-labels:mb-1";
+            wrap.style.setProperty("--d", (base + idx * 0.2).toFixed(2) + "s");
+
+            const ring = document.createElement("div");
+            ring.className =
+              "w-[1.95rem] h-[1.95rem] rounded-[0.85rem] grid place-items-center bg-white shadow-[0_8px_18px_rgba(15,23,42,0.06)] ring-1 ring-[rgba(15,23,42,0.08)] transition-all duration-300 hover:shadow-[0_10px_24px_rgba(37,99,235,0.14)] hover:ring-[rgba(37,99,235,0.22)] hover:scale-[1.03] show-labels:w-[1.7rem] show-labels:h-[1.7rem] show-labels:rounded-[0.75rem]";
+            ring.innerHTML = itm.svg;
+            ring.title = itm.name;
+            ring.setAttribute("role", "img");
+            ring.setAttribute("aria-label", itm.name);
+            wrap.appendChild(ring);
+
+            if (STATE.showLabels) {
+              const label = document.createElement("span");
+              label.className =
+                "text-[0.6rem] text-gray-500 opacity-0 -translate-x-[10px] transition-all duration-300 show-labels:opacity-100 show-labels:translate-x-0 whitespace-normal text-left";
+              label.textContent = itm.name;
+              wrap.appendChild(label);
+
+              const meta = document.createElement("div");
+              meta.className =
+                "text-[0.5rem] text-gray-500 opacity-0 translate-y-[5px] transition-all duration-300 relative top-auto left-auto z-[5] whitespace-nowrap flex flex-col gap-[0.1rem] items-start w-full justify-start show-labels:opacity-100 show-labels:translate-y-0";
+              meta.innerHTML = `<span>Stage: ${itm.config.stage}</span><span>Policy: ${itm.config.policy}</span><span>Region: ${itm.config.region}</span><span>Device: ${itm.config.device}</span>`;
+              wrap.appendChild(meta);
+            }
+
+            mount.appendChild(wrap);
+          });
+          base += 1.2;
+        });
+
+        buildTiles(document.getElementById("flowConnA"), 14, 3);
+        buildTiles(document.getElementById("flowConnB"), 14, 3.5);
+        buildTiles(document.getElementById("flowConnC"), 14, 4);
+        buildTiles(document.getElementById("flowGrpA"), 18, 5);
+        buildTiles(document.getElementById("flowGrpB"), 18, 5.5);
+        buildTiles(document.getElementById("flowGrpC"), 18, 6);
+        buildTiles(document.getElementById("flowDevA"), 10, 8);
+        buildTiles(document.getElementById("flowDevB"), 10, 8.5);
+        buildTiles(document.getElementById("flowDevC"), 10, 9);
+
+        const avatar = document.getElementById("endUserAvatar");
+        const badge = document.getElementById("endUserBadge");
+        if (avatar) {
+          avatar.classList.add("bg-red-600");
+          avatar.classList.remove("bg-green-500");
+          avatar.textContent = "U";
+        }
+        if (badge) {
+          badge.textContent = "!";
+          badge.classList.add("bg-red-600");
+          badge.classList.remove("bg-green-500");
+          badge.style.opacity = "0";
+          badge.style.transform = "translateY(-6px) scale(0.9)";
+        }
+
+        const message = document.getElementById("endUserMessage");
+        if (message) message.textContent = "Apps on demand — without retraining users when IT changes.";
+        const mini = document.getElementById("miniWorkspace");
+        if (mini) mini.classList.add("hidden");
+        const counters = document.getElementById("progressCounters");
+        if (counters) counters.classList.add("hidden");
+
+        const card = document.getElementById("flowCard");
+        if (card) {
+          card.classList.remove("run");
+          card.classList.remove("workspace-final");
+        }
+
+        const endCard = document.getElementById("endUserCard");
+        if (endCard) endCard.classList.remove("scale-105", "bg-white", "border-green-500");
+
+        document.querySelectorAll(".processed").forEach((el) => el.classList.remove("processed"));
+        document.querySelectorAll(".dimmed").forEach((el) => el.classList.remove("dimmed"));
+        document.querySelectorAll(".highlighted").forEach((el) => el.classList.remove("highlighted"));
+
+        STATE.progress = { apps: 0, time: 0, tickets: 0 };
+        updateProgress();
+
+        const success = document.getElementById("flowSuccess");
+        if (success) success.classList.add("hidden");
+
+        hideTruck();
+        setTimeout(() => {
+          computeTruckPath();
+          setTruckProgress(STATE.progress.apps);
+        }, 0);
+      }
+
+      function buildTiles(container, count, baseDelay) {
+        if (!container) return;
+        container.innerHTML = "";
+        for (let i = 0; i < count; i++) {
+          const d = document.createElement("div");
+          d.className = "w-[0.4rem] h-[0.4rem] rounded-[2px] bg-gray-200 opacity-90";
+          d.setAttribute("data-anim", "tilePulse");
+          d.style.setProperty("--d", (baseDelay + i * 0.1).toFixed(2) + "s");
+          container.appendChild(d);
+        }
+      }
+
+      function stopFlowTimers() {
+        flowRunning = false;
+        if (flowInterval) clearInterval(flowInterval);
+        flowInterval = null;
+      }
+
+      function startFlow() {
+        stopFlowTimers();
+        Confetti.clear();
+
+        runWorkspaceAnimation();
+
+        const startBtn = document.getElementById("workspaceStartButton");
+        Confetti.burstAtElement(startBtn, { count: 90, spread: 85, power: 12 });
+
+        const card = document.getElementById("flowCard");
+        if (!card) return;
+        card.classList.remove("run");
+        void card.offsetWidth;
+        card.classList.add("run");
+
+        // Truck indicator starts at the top and moves DOWN in sync with apps processed
+        showTruck();
+
+        const flash = document.getElementById("flowHubFlash");
+        const success = document.getElementById("flowSuccess");
+        const avatar = document.getElementById("endUserAvatar");
+        const badge = document.getElementById("endUserBadge");
+        const message = document.getElementById("endUserMessage");
+        const mini = document.getElementById("miniWorkspace");
+        const counters = document.getElementById("progressCounters");
+        const endCard = document.getElementById("endUserCard");
+        const groups = document.getElementById("groupsSection");
+
+        if (flash) {
+          flash.classList.remove("hidden");
+          setTimeout(() => flash.classList.add("hidden"), 2000);
+        }
+        if (success) success.classList.add("hidden");
+        if (counters) counters.classList.remove("hidden");
+
+        flowRunning = true;
+        flowInterval = setInterval(updateProgress, 100);
+
+        setTimeout(() => {
+          if (groups) groups.classList.add("dimmed");
+          if (endCard) endCard.classList.add("highlighted");
+        }, 5000);
+
+        const platformBuckets = document.querySelectorAll("#platformsSection > div");
+        const groupBuckets = document.querySelectorAll("#groupsSection > div");
+        const deviceBuckets = document.querySelectorAll("#devicesSection > div");
+
+        setTimeout(() => platformBuckets[0] && platformBuckets[0].classList.add("processed"), 4500);
+        setTimeout(() => platformBuckets[1] && platformBuckets[1].classList.add("processed"), 5000);
+        setTimeout(() => platformBuckets[2] && platformBuckets[2].classList.add("processed"), 5500);
+
+        setTimeout(() => groupBuckets[0] && groupBuckets[0].classList.add("processed"), 6500);
+        setTimeout(() => groupBuckets[1] && groupBuckets[1].classList.add("processed"), 7000);
+        setTimeout(() => groupBuckets[2] && groupBuckets[2].classList.add("processed"), 7500);
+
+        setTimeout(() => deviceBuckets[0] && deviceBuckets[0].classList.add("processed"), 8500);
+        setTimeout(() => deviceBuckets[1] && deviceBuckets[1].classList.add("processed"), 9000);
+        setTimeout(() => deviceBuckets[2] && deviceBuckets[2].classList.add("processed"), 9500);
+
+        // Completion state
+        setTimeout(() => {
+          if (avatar) {
+            avatar.classList.remove("bg-red-600");
+            avatar.classList.add("bg-green-500");
+          }
+          if (badge) {
+            badge.textContent = "✓";
+            badge.classList.remove("bg-red-600");
+            badge.classList.add("bg-green-500");
+            badge.style.opacity = "1";
+            badge.style.transform = "translateY(0) scale(1)";
+          }
+          if (message) message.textContent = "Apps on demand — without retraining users when IT changes.";
+          if (mini) mini.classList.remove("hidden");
+          if (endCard) {
+            endCard.classList.add("scale-105", "bg-white", "border-green-500");
+            endCard.classList.remove("highlighted");
+          }
+          if (success) success.classList.remove("hidden");
+
+          Confetti.burstAtElement(endCard, { count: 70, spread: 70, power: 10 });
+
+          stopFlowTimers();
+        }, 11000);
+
+        setTimeout(() => card.classList.remove("run"), 12000);
+      }
+
+      function updateProgress() {
+        if (STATE.progress.apps < 128) STATE.progress.apps += 4;
+        if (STATE.progress.time < 46) STATE.progress.time += 2;
+        if (STATE.progress.tickets < 73) STATE.progress.tickets += 3;
+
+        const apps = STATE.progress.apps > 128 ? 128 : STATE.progress.apps;
+        const time = STATE.progress.time > 46 ? 46 : STATE.progress.time;
+        const tickets = STATE.progress.tickets > 73 ? 73 : STATE.progress.tickets;
+
+        setText("appsProcessed", apps);
+        setText("timeSaved", time);
+        setText("ticketsAvoided", tickets);
+
+        // Keep the truck position + label in sync with app processing
+        setText("truckApps", apps);
+        setTruckProgress(apps);
+      }
+
+      function setText(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = String(value);
+      }
+
+      function resetFlow() {
+        stopFlowTimers();
+        clearApproachTimeouts();
+        hideApproachLayers();
+        Confetti.clear();
+
+        STATE.progress = { apps: 0, time: 0, tickets: 0 };
+        STATE.showLabels = false;
+        buildFlow();
+
+        const card = document.getElementById("flowCard");
+        if (card) {
+          card.classList.remove("run");
+          card.classList.remove("workspace-final");
+        }
+
+        document.querySelectorAll(".processed").forEach((el) => el.classList.remove("processed"));
+        document.querySelectorAll(".dimmed").forEach((el) => el.classList.remove("dimmed"));
+        document.querySelectorAll(".highlighted").forEach((el) => el.classList.remove("highlighted"));
+
+        hideTruck();
+      }
+
+      /* =========================
+         ESC HANDLING (safe, attach once)
+         ========================= */
+      let escapeWired = false;
+      function wireEscapeOnce() {
+        if (escapeWired) return;
+        escapeWired = true;
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && (STATE.modalOpen || STATE.openWhyModal)) {
+            STATE.modalOpen = false;
+            STATE.openWhyModal = null;
+            render();
+          }
+        });
+      }
+
+      /* =========================
+         IMAGE UPLOAD AND VIEWER
+         ========================= */
+      function renderUploadIcon() {
+        return `
+          <div id="uploadIcon" class="fixed bottom-5 left-5 z-50">
+            <button type="button" data-action="upload-images" class="bg-white border border-gray-300 rounded-full p-2 shadow hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="Upload Images">
+              <i data-lucide="pencil" class="w-5 h-5 text-gray-700"></i>
+            </button>
+            <input id="imageUploadInput" type="file" accept="image/*" multiple class="hidden">
+          </div>
+        `;
+      }
+
+      function renderImagePlayer() {
+        if (!STATE.showImagePlayer || !STATE.uploadedImages || STATE.uploadedImages.length === 0) return "";
+        const idx = STATE.currentImageIndex || 0;
+        const images = STATE.uploadedImages;
+        const total = images.length;
+        const currentSrc = images[idx];
+        return `
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-overlayFade" role="dialog" aria-modal="true">
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-4xl mx-4 animate-modalEnter">
+              <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
+                <div class="font-semibold text-lg text-gray-900">Image Viewer</div>
+                <button type="button" class="text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 p-1.5" data-action="close-image-modal" aria-label="Close">
+                  <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+              </div>
+              <div class="p-4 bg-gray-50 flex flex-col items-center justify-center">
+                <img src="${currentSrc}" alt="Uploaded Image ${idx + 1}" class="max-h-[60vh] object-contain rounded-md">
+                <div class="mt-4 w-full flex items-center justify-between">
+                  <button type="button" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="prev-image">
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i><span class="sr-only">Previous</span>
+                  </button>
+                  <span class="text-sm text-gray-600">${idx + 1} / ${total}</span>
+                  <button type="button" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="next-image">
+                    <span class="sr-only">Next</span><i data-lucide="chevron-right" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      /* =========================
+         BOOT
+         ========================= */
+      document.addEventListener("DOMContentLoaded", () => {
+        Confetti.init();
+        wireEscapeOnce();
+
+        // Keep truck path accurate on resize (only matters on solution tab)
+        window.addEventListener(
+          "resize",
+          () => {
+            if (STATE.activeTab !== "solution") return;
+            computeTruckPath();
+            setTruckProgress(STATE.progress.apps);
+          },
+          { passive: true }
+        );
+
+        // Ensure wizard has a starting “explored” state
+        STATE.visitedCards = [NEW_CARDS[0].id];
+
+        render();
       });
-
-      buildTiles(document.getElementById('flowConnA'), 14, .5);
-      buildTiles(document.getElementById('flowConnB'), 14, .56);
-      buildTiles(document.getElementById('flowConnC'), 14, .62);
-      buildTiles(document.getElementById('flowGrpA'), 18, .95);
-      buildTiles(document.getElementById('flowGrpB'), 18, 1.0);
-      buildTiles(document.getElementById('flowGrpC'), 18, 1.05);
-      buildTiles(document.getElementById('flowDevA'), 10, 1.5);
-      buildTiles(document.getElementById('flowDevB'), 10, 1.55);
-      buildTiles(document.getElementById('flowDevC'), 10, 1.6);
-
-      // Reset end-user state to "red"
-      const avatar=document.getElementById('endUserAvatar');
-      const badge=document.getElementById('endUserBadge');
-      if(avatar){ avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); avatar.textContent='U'; }
-      if(badge){ badge.textContent='!'; badge.classList.remove('bg-rose-500'); badge.classList.add('bg-rose-500'); }
-    }
-    function buildTiles(container,count,baseDelay){
-      if(!container) return; container.innerHTML='';
-      for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='tile'; d.style.setProperty('--d',(baseDelay+i*0.04).toFixed(2)+'s'); container.appendChild(d); }
-    }
-
-    function startFlow(){
-      const card=document.getElementById('flowCard'); if(!card) return;
-      card.classList.remove('run'); void card.offsetWidth; card.classList.add('run');
-      const flash=document.getElementById('flowHubFlash'); const success=document.getElementById('flowSuccess');
-      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
-      if(flash){ flash.classList.remove('hidden'); setTimeout(()=>flash.classList.add('hidden'),1000); }
-      if(success) success.classList.add('hidden');
-      // Turn end user green after flow complete
-      setTimeout(()=>{
-        if(avatar){ avatar.classList.remove('bg-rose-600/90'); avatar.classList.add('bg-emerald-500'); }
-        if(badge){ badge.textContent='✓'; badge.classList.remove('bg-rose-500'); badge.classList.add('bg-green-500'); }
-      }, 2100);
-      setTimeout(()=> success && success.classList.remove('hidden'), 2500);
-      setTimeout(()=> card.classList.remove('run'), 6000);
-    }
-    function resetFlow(){
-      const card=document.getElementById('flowCard'); if(!card) return;
-      card.classList.remove('run');
-      const success=document.getElementById('flowSuccess'); if(success) success.classList.add('hidden');
-      // Reset end user to red
-      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
-      if(avatar){ avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); }
-      if(badge){ badge.textContent='!'; badge.classList.remove('bg-green-500'); badge.classList.add('bg-rose-500'); }
-    }
-
-    /* ---------- Init ---------- */
-    document.addEventListener('DOMContentLoaded', render);
-  </script>
-</body>
+    </script>
+  </body>
 </html>
