@@ -13,14 +13,14 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
       :root {
-        --bg-main: #f9fafb;
+        --bg-main: linear-gradient(to bottom, #ffffff, #f9fafb);
         --text-primary: #111827;
         --primary: #2563eb;
         --primary-hover: #1d4ed8;
         --radius: 1rem;
         --border-subtle: #e5e7eb;
-        --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-        --shadow-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+        --shadow-hover: 0 10px 20px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.06);
       }
       html, body {
         background: var(--bg-main);
@@ -112,11 +112,11 @@
       .chart-year-label { font-size: 14px; fill: #111827; }
       @media (max-width: 640px) { .chart-year-label { font-size: 12px; transform: rotate(-45deg) translate(-10px, 10px); } }
       .chart-annotation { font-size: 20px; font-weight: 500; fill: #6b7280; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-      .demand-line { stroke-width: 3; filter: drop-shadow(0 0 4px rgba(239,68,68,0.3)); }
-      .capacity-line { stroke-width: 3; }
+      .demand-line { stroke-width: 3; filter: drop-shadow(0 0 4px rgba(239,68,68,0.3)); stroke: var(--primary); }
+      .capacity-line { stroke-width: 3; stroke: var(--primary); }
       .gap-fill { }
       .marker-group:hover { transform: scale(1.1); transition: transform 0.2s ease; }
-      .marker-group:hover circle { animation: pulse 1.5s infinite; }
+      .marker-group:hover circle { animation: pulse 1.5s infinite; filter: drop-shadow(0 0 8px var(--primary)); }
       @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
       .chart-element { opacity: 0; animation: fadeIn 0.5s forwards; }
       @keyframes fadeIn { to { opacity: 1; } }
@@ -125,6 +125,8 @@
       .gap-element { animation-delay: 0.6s; }
       .marker-element { animation-delay: 0.9s; }
       .label-element { animation-delay: 1.2s; }
+      .modal-content { background: rgba(255,255,255,0.8); backdrop-filter: blur(16px); }
+      .modal-content.active { background: rgba(255,255,255,0.5); backdrop-filter: blur(24px); }
     </style>
   </head>
   <body class="min-h-screen antialiased">
@@ -2046,4 +2048,3 @@
     </script>
   </body>
 </html>
-.
